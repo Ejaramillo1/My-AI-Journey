@@ -1,13 +1,9 @@
 # Hugo Site Configuration
-# Theme: PaperMod via Hugo Modules
+# Theme: PaperMod (git submodule)
 baseURL = "https://ejaramillo1.github.io/My-AI-Journey/"
 languageCode = "en-us"
 title = "My AI Journey"
 theme = "PaperMod"
-
-[module]
-  [[module.imports]]
-    path = "github.com/adityatelange/hugo-PaperMod"
 
 enableEmoji = true
 
