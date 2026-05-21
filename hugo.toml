@@ -19,7 +19,10 @@ enableEmoji = true
     url = "https://github.com/ejaramillo1"
   [[params.socialIcons]]
     name = "linkedin"
-    url = "https://linkedin.com/in/ed-jaramillo"
+    url = "https://www.linkedin.com/in/jose-eduardo-jaramillo"
+  [[params.socialIcons]]
+    name = "email"
+    url = "mailto:ejaramillobarrera@gmail.com"
 
   [params.homeInfoParams]
     Title = "Hi, I'm Ed 👋"
