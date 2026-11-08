@@ -4,7 +4,7 @@ date: 2026-05-21
 draft: false
 layout: "page"
 cover:
-  image: "/images/hero-bg.jpg"
+  image: "images/hero-bg.jpg"
   alt: "Rainy neon city street in pink and cyan, the visual motif of the blog"
 ---
 

@@ -90,10 +90,11 @@
     {{- partial "post_meta.html" . -}}
   </footer>
   {{- end }}
-  {{- with .Params.tags }}
+  {{- $tags := .Language.Params.Taxonomies.tag | default "tags" }}
+  {{- with (.GetTerms $tags) }}
   <div class="entry-tags">
     {{- range . }}
-    <a class="entry-tag" href="{{ (printf "/tags/%s/" (. | urlize)) | relLangURL }}">{{ . }}</a>
+    <a class="entry-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
     {{- end }}
   </div>
   {{- end }}

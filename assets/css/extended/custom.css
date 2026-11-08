@@ -94,7 +94,7 @@ code, pre, kbd {
     border-radius: 20px;
     background:
         linear-gradient(115deg, rgba(7, 11, 31, 0.94) 30%, rgba(13, 19, 50, 0.55) 65%, rgba(7, 11, 31, 0.25) 100%),
-        url("/images/hero-bg.jpg") center right / cover no-repeat,
+        url("/My-AI-Journey/images/hero-bg.jpg") center right / cover no-repeat,
         var(--indigo-900);
     box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.65);
 }
@@ -102,7 +102,7 @@ code, pre, kbd {
 :root[data-theme="light"] .first-entry.home-info {
     background:
         linear-gradient(115deg, rgba(246, 247, 252, 0.97) 30%, rgba(246, 247, 252, 0.82) 65%, rgba(246, 247, 252, 0.55) 100%),
-        url("/images/hero-bg.jpg") center right / cover no-repeat,
+        url("/My-AI-Journey/images/hero-bg.jpg") center right / cover no-repeat,
         var(--indigo-900);
 }
 
@@ -817,7 +817,7 @@ code, pre, kbd {
     background:
         linear-gradient(115deg, rgba(7, 11, 31, 0.96) 28%, rgba(13, 19, 50, 0.62) 62%, rgba(7, 11, 31, 0.30) 100%),
         linear-gradient(to top, rgba(255, 46, 136, 0.16) 0%, rgba(34, 211, 238, 0.10) 26%, transparent 55%),
-        url("/images/hero-bg.jpg") center right / cover no-repeat,
+        url("/My-AI-Journey/images/hero-bg.jpg") center right / cover no-repeat,
         var(--indigo-900);
     /* Stronger pink presence in the neon frame glow. */
     box-shadow:
