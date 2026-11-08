@@ -14,8 +14,8 @@
         {{ .Content | $.Page.RenderString $opts }}
     </div>
     <div class="hero-buttons">
-        <a class="hero-btn" href="{{ "/posts/" | relLangURL }}">{{ if eq site.Language.Lang "es" }}Leer el blog →{{ else }}Read the blog →{{ end }}</a>
-        <a class="hero-btn-ghost" href="{{ "/about/" | relLangURL }}">{{ if eq site.Language.Lang "es" }}Acerca de mí{{ else }}About me{{ end }}</a>
+        <a class="hero-btn" href="{{ "posts/" | relLangURL }}">{{ if eq site.Language.Lang "es" }}Leer el blog →{{ else }}Read the blog →{{ end }}</a>
+        <a class="hero-btn-ghost" href="{{ "about/" | relLangURL }}">{{ if eq site.Language.Lang "es" }}Acerca de mí{{ else }}About me{{ end }}</a>
     </div>
     <footer class="entry-footer">
         {{ partial "social_icons.html" (dict "align" site.Params.homeInfoParams.AlignSocialIconsTo) }}
