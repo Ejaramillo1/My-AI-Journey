@@ -1,0 +1,24 @@
+{{- with site.Params.homeInfoParams }}
+<article class="first-entry home-info">
+    <div class="hero-rain" aria-hidden="true"></div>
+    <header class="entry-header hero-head">
+        <div class="hero-avatar" aria-hidden="true">EJ</div>
+        <h1>{{ .Title | markdownify }}</h1>
+    </header>
+    <p class="hero-kicker"><span class="hero-kicker-prompt">$</span> ./my-ai-journey <span class="hero-kicker-status">● online</span></p>
+    {{- with .Tagline }}
+    <p class="hero-tagline glitch" data-text="{{ . }}">{{ . }}</p>
+    {{- end }}
+    <div class="entry-content md-content">
+        {{ $opts := dict "display" "block" }}
+        {{ .Content | $.Page.RenderString $opts }}
+    </div>
+    <div class="hero-buttons">
+        <a class="hero-btn" href="{{ "/posts/" | relLangURL }}">{{ if eq site.Language.Lang "es" }}Leer el blog →{{ else }}Read the blog →{{ end }}</a>
+        <a class="hero-btn-ghost" href="{{ "/about/" | relLangURL }}">{{ if eq site.Language.Lang "es" }}Acerca de mí{{ else }}About me{{ end }}</a>
+    </div>
+    <footer class="entry-footer">
+        {{ partial "social_icons.html" (dict "align" site.Params.homeInfoParams.AlignSocialIconsTo) }}
+    </footer>
+</article>
+{{- end -}}

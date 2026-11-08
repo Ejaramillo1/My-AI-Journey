@@ -1,0 +1,994 @@
+/* My AI Journey — custom identity
+   Dark indigo-navy + cyan, matching Eduardo's LinkedIn banner.
+   Overrides PaperMod's CSS variables and restyles the hero, cards and type.
+   Loaded automatically: PaperMod picks up everything in assets/css/extended/. */
+
+/* ---------- Fonts ---------- */
+:root {
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --accent: #22d3ee;
+    --accent-soft: #67e8f9;
+    --accent-deep: #0891b2;
+    --indigo-950: #070b1f;
+    --indigo-900: #0d1332;
+    --indigo-800: #141b45;
+    --indigo-700: #1e2760;
+}
+
+body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+code, pre, kbd {
+    font-family: var(--font-mono);
+}
+
+/* ---------- Light theme (kept clean, indigo-tinted) ---------- */
+:root {
+    --theme: rgb(246, 247, 252);
+    --entry: rgb(255, 255, 255);
+    --primary: rgb(19, 26, 58);
+    --secondary: rgb(90, 100, 140);
+    --tertiary: rgb(200, 205, 225);
+    --content: rgb(44, 52, 88);
+    --code-block-bg: rgb(13, 19, 50);
+    --code-bg: rgb(232, 236, 248);
+    --border: rgb(220, 224, 240);
+}
+
+/* ---------- Dark theme: indigo-navy (default) ---------- */
+:root[data-theme="dark"] {
+    --theme: rgb(7, 11, 31);
+    --entry: rgb(16, 23, 54);
+    --primary: rgb(233, 237, 251);
+    --secondary: rgb(154, 166, 214);
+    --tertiary: rgb(52, 60, 110);
+    --content: rgb(199, 207, 233);
+    --code-block-bg: rgb(13, 19, 50);
+    --code-bg: rgb(30, 39, 96);
+    --border: rgb(35, 44, 92);
+}
+
+/* ---------- Header ---------- */
+.header {
+    background: color-mix(in srgb, var(--theme) 82%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+}
+
+.logo a {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.logo > a::after {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-left: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    vertical-align: baseline;
+}
+
+#menu a:hover,
+#menu .active {
+    color: var(--accent-soft);
+}
+
+#menu .active {
+    border-bottom-color: var(--accent);
+}
+
+/* ---------- Hero (home-info) ---------- */
+.first-entry.home-info {
+    position: relative;
+    overflow: hidden;
+    padding: 56px 40px 44px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background:
+        linear-gradient(115deg, rgba(7, 11, 31, 0.94) 30%, rgba(13, 19, 50, 0.55) 65%, rgba(7, 11, 31, 0.25) 100%),
+        url("/images/hero-bg.jpg") center right / cover no-repeat,
+        var(--indigo-900);
+    box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.65);
+}
+
+:root[data-theme="light"] .first-entry.home-info {
+    background:
+        linear-gradient(115deg, rgba(246, 247, 252, 0.97) 30%, rgba(246, 247, 252, 0.82) 65%, rgba(246, 247, 252, 0.55) 100%),
+        url("/images/hero-bg.jpg") center right / cover no-repeat,
+        var(--indigo-900);
+}
+
+.first-entry.home-info .entry-header h1 {
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.first-entry.home-info .entry-content {
+    font-size: 18px;
+    line-height: 1.65;
+    max-width: 560px;
+}
+
+.first-entry.home-info .entry-content strong {
+    color: var(--accent-soft);
+}
+
+:root[data-theme="light"] .first-entry.home-info .entry-content strong {
+    color: var(--accent-deep);
+}
+
+/* Hero tagline + buttons injected via homeInfoParams content */
+.hero-tagline {
+    display: block;
+    margin-top: 4px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent-soft);
+    letter-spacing: -0.01em;
+}
+
+:root[data-theme="light"] .hero-tagline {
+    color: var(--accent-deep);
+}
+
+.hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 26px;
+}
+
+.hero-btn {
+    display: inline-block;
+    padding: 11px 22px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #06121f !important;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none !important;
+    border: 1px solid var(--accent);
+    box-shadow: 0 8px 24px -8px rgba(34, 211, 238, 0.55);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hero-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -8px rgba(34, 211, 238, 0.7);
+}
+
+.hero-btn-ghost {
+    display: inline-block;
+    padding: 11px 22px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--primary) !important;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none !important;
+    border: 1px solid var(--tertiary);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.hero-btn-ghost:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.first-entry.home-info .social-icons {
+    margin-top: 22px;
+}
+
+.first-entry.home-info .social-icons a:hover {
+    color: var(--accent);
+}
+
+/* ---------- Post cards ---------- */
+.post-entry {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.post-entry:hover {
+    transform: translateY(-3px);
+    border-color: rgba(34, 211, 238, 0.55);
+    box-shadow: 0 18px 40px -18px rgba(34, 211, 238, 0.28), 0 18px 40px -22px rgba(0, 0, 0, 0.6);
+}
+
+.post-entry .entry-cover {
+    margin-bottom: 0;
+}
+
+.post-entry .entry-cover img {
+    border-radius: 0;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+    width: 100%;
+}
+
+.post-entry .entry-header,
+.post-entry .entry-content,
+.post-entry .entry-footer {
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.post-entry .entry-header {
+    padding-top: 20px;
+}
+
+.post-entry .entry-header h2 {
+    font-size: 23px;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+}
+
+.post-entry .entry-footer {
+    padding-bottom: 20px;
+}
+
+/* First post on the homepage gets the featured treatment */
+.first-entry:not(.home-info) .entry-header h2 {
+    font-size: 28px;
+}
+
+/* ---------- Links, headings, type ---------- */
+.post-content a,
+.entry-content a {
+    color: var(--accent-soft);
+    text-decoration-color: rgba(103, 232, 249, 0.45);
+    text-underline-offset: 3px;
+}
+
+:root[data-theme="light"] .post-content a,
+:root[data-theme="light"] .entry-content a {
+    color: var(--accent-deep);
+}
+
+.post-content a:hover,
+.entry-content a:hover {
+    text-decoration-color: var(--accent);
+}
+
+.post-content h1,
+.post-content h2,
+.post-content h3,
+.post-content h4 {
+    letter-spacing: -0.02em;
+}
+
+.post-content h2 {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+}
+
+.post-content h2 .anchor,
+.post-content h3 .anchor {
+    color: var(--accent);
+}
+
+.post-content blockquote {
+    border-inline-start: 3px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 18px;
+}
+
+.post-content code {
+    border-radius: 5px;
+}
+
+.post-content pre code {
+    border-radius: 10px;
+}
+
+/* ---------- Tags & meta ---------- */
+.post-tags a,
+.post-meta .post-tags a {
+    border: 1px solid var(--tertiary);
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--secondary);
+    background: transparent;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.post-tags a:hover {
+    border-color: var(--accent);
+    color: var(--accent-soft);
+    background: transparent;
+}
+
+.post-meta {
+    color: var(--secondary);
+}
+
+/* ---------- Single post cover ---------- */
+.post-single .entry-cover img {
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+    width: 100%;
+}
+
+.post-title {
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+}
+
+.post-description {
+    font-size: 18px;
+    color: var(--secondary);
+    line-height: 1.55;
+}
+
+/* ---------- Table of contents ---------- */
+.toc {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--entry);
+}
+
+.toc .inner {
+    margin: 0;
+}
+
+.toc a:hover {
+    color: var(--accent-soft);
+}
+
+/* ---------- Buttons, pagination, misc ---------- */
+.pagination a {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.pagination a:hover {
+    border-color: var(--accent);
+    color: var(--accent-soft);
+}
+
+.top-link {
+    background: var(--entry);
+    border: 1px solid var(--border);
+}
+
+.top-link:hover {
+    color: var(--accent);
+}
+
+.page-header h1 {
+    letter-spacing: -0.02em;
+}
+
+.footer {
+    color: var(--secondary);
+}
+
+.footer a:hover {
+    color: var(--accent-soft);
+}
+
+#searchbox input {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--entry);
+}
+
+#searchbox input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18);
+}
+
+/* ---------- About page ---------- */
+.post-single .post-content .about-intro {
+    font-size: 18px;
+    line-height: 1.65;
+}
+
+.about-banner {
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    width: 100%;
+    margin: 8px 0 4px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+    .first-entry.home-info {
+        padding: 36px 22px 30px;
+    }
+
+    .first-entry.home-info .entry-header h1 {
+        font-size: 32px;
+    }
+
+    .first-entry.home-info .entry-content {
+        font-size: 16px;
+    }
+
+    .hero-tagline {
+        font-size: 17px;
+    }
+}
+
+/* ---------- Fixes from the visual review (2026-11-08) ---------- */
+
+/* 1. Hero text must always wrap: the old home-info content rendered as an
+   indented code block (no wrapping, horizontal scrollbar). The config fix
+   removes the indentation; this CSS is belt-and-braces so no <pre> in the
+   hero can ever overflow again. */
+.home-info .entry-content {
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.home-info pre,
+.home-info code {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* 2. Tighten header-to-hero spacing (was ~130px of empty space). */
+.main {
+    padding-top: 12px;
+}
+
+.first-entry {
+    margin-top: 4px;
+}
+
+/* 3. Monogram avatar in the hero (no profile photo on file yet). */
+/* Specificity beats PaperMod's `.first-entry .entry-header { display: flow-root }`. */
+.first-entry.home-info .hero-head {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.first-entry.home-info .hero-head h1 {
+    margin: 0;
+}
+
+.hero-avatar {
+    flex: 0 0 auto;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #eafcff;
+    background: radial-gradient(circle at 30% 25%, #1e2760 0%, #0d1332 70%);
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12), 0 10px 28px -10px rgba(34, 211, 238, 0.45);
+}
+
+/* 4. Tag pills on post cards (PaperMod shows no tags in lists). */
+.entry-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 24px 20px;
+}
+
+.entry-tag {
+    position: relative;
+    z-index: 1;
+    border: 1px solid var(--tertiary);
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--secondary);
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.entry-tag:hover {
+    border-color: var(--accent);
+    color: var(--accent-soft);
+}
+
+/* 5. Branded footer: keep the Hugo/PaperMod credit, add identity. */
+.footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 8px;
+    text-align: center;
+}
+
+/* ================================================================
+   CYBERPUNK ITERATION (2026-11-08)
+   Pushes the indigo + cyan identity toward neon cyberpunk while
+   keeping the blog readable: neon is for accents, never body text.
+   Most effects are scoped to the dark theme (the default).
+   ================================================================ */
+
+:root {
+    --neon-pink: #ff2e88;
+    --neon-pink-soft: #ff7ab8;
+    --neon-green: #4ade80;
+}
+
+/* ---------- Logo: cyan dot becomes a blinking magenta cursor ---------- */
+.logo > a::after {
+    width: 10px;
+    height: 15px;
+    margin-left: 8px;
+    border-radius: 2px;
+    background: var(--neon-pink);
+    animation: cursor-blink 1.1s steps(1) infinite;
+}
+
+@keyframes cursor-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+/* ---------- Header: neon gradient hairline ---------- */
+.header {
+    position: relative;
+}
+
+.header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--neon-pink) 55%, transparent 100%);
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* ---------- Hero: grid + scanlines + neon frame ---------- */
+.first-entry.home-info {
+    border: 1px solid rgba(34, 211, 238, 0.35);
+    box-shadow:
+        0 0 0 1px rgba(255, 46, 136, 0.08),
+        0 0 42px -12px rgba(34, 211, 238, 0.45),
+        0 24px 60px -24px rgba(0, 0, 0, 0.65);
+}
+
+/* Grid texture (right-weighted) */
+.first-entry.home-info::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image:
+        linear-gradient(rgba(34, 211, 238, 0.09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.09) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: linear-gradient(100deg, transparent 25%, black 75%);
+    mask-image: linear-gradient(100deg, transparent 25%, black 75%);
+    pointer-events: none;
+}
+
+/* Scanlines */
+.first-entry.home-info::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px);
+    pointer-events: none;
+}
+
+/* Keep hero content above the texture layers */
+.first-entry.home-info > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Hero heading: faint neon glow (dark only) */
+:root[data-theme="dark"] .first-entry.home-info .entry-header h1 {
+    text-shadow: 0 0 22px rgba(34, 211, 238, 0.35);
+}
+
+/* ---------- Hero kicker (terminal status line) ---------- */
+.hero-kicker {
+    margin: 10px 0 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--secondary);
+}
+
+.hero-kicker-prompt {
+    color: var(--neon-pink);
+    font-weight: 700;
+}
+
+.hero-kicker-status {
+    color: var(--neon-green);
+}
+
+/* ---------- Tagline: subtle CSS-only RGB-split glitch (dark only) ---------- */
+.hero-tagline.glitch {
+    position: relative;
+}
+
+:root[data-theme="dark"] .hero-tagline.glitch::before,
+:root[data-theme="dark"] .hero-tagline.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    font: inherit;
+    letter-spacing: inherit;
+}
+
+:root[data-theme="dark"] .hero-tagline.glitch::before {
+    color: var(--neon-pink);
+    animation: tagline-glitch-a 6s infinite steps(1, end);
+}
+
+:root[data-theme="dark"] .hero-tagline.glitch::after {
+    color: var(--accent);
+    animation: tagline-glitch-b 7s infinite steps(1, end);
+}
+
+/* Mostly invisible; brief RGB-split slices a few times per cycle. */
+@keyframes tagline-glitch-a {
+    0%, 90.9%, 93.6%, 100% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+    91%   { opacity: 0.85; transform: translate(-3px, 1px); clip-path: inset(12% 0 58% 0); }
+    92%   { opacity: 0.85; transform: translate(3px, -1px); clip-path: inset(62% 0 8% 0); }
+    93%   { opacity: 0.85; transform: translate(-2px, 0); clip-path: inset(38% 0 42% 0); }
+}
+
+@keyframes tagline-glitch-b {
+    0%, 88.9%, 91.6%, 100% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+    89%   { opacity: 0.85; transform: translate(3px, 0); clip-path: inset(48% 0 28% 0); }
+    90%   { opacity: 0.85; transform: translate(-3px, 1px); clip-path: inset(8% 0 72% 0); }
+    91%   { opacity: 0.85; transform: translate(2px, -1px); clip-path: inset(70% 0 4% 0); }
+}
+
+/* ---------- Buttons: chamfered cyberpunk corners, neon glow ---------- */
+.hero-btn,
+.hero-btn-ghost {
+    border-radius: 0;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+.hero-btn {
+    border: none;
+    filter: drop-shadow(0 8px 18px rgba(34, 211, 238, 0.45));
+}
+
+.hero-btn:hover {
+    filter: drop-shadow(0 10px 22px rgba(255, 46, 136, 0.55));
+}
+
+.hero-btn-ghost {
+    border: none;
+    box-shadow: inset 0 0 0 1px var(--tertiary);
+}
+
+.hero-btn-ghost:hover {
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* ---------- Post cards: sharper corners, neon top edge on hover ---------- */
+.post-entry {
+    border-radius: 4px;
+}
+
+.post-entry::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--neon-pink));
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    pointer-events: none;
+}
+
+.post-entry:hover {
+    border-color: rgba(34, 211, 238, 0.6);
+    box-shadow:
+        0 0 0 1px rgba(255, 46, 136, 0.15),
+        0 0 28px -8px rgba(34, 211, 238, 0.4),
+        0 18px 40px -22px rgba(0, 0, 0, 0.6);
+}
+
+.post-entry:hover::after {
+    opacity: 1;
+}
+
+.post-entry .entry-header h2 {
+    transition: color 0.15s ease;
+}
+
+.post-entry:hover .entry-header h2 {
+    color: var(--accent-soft);
+}
+
+/* Single-post cover: sharper corners to match */
+.post-single .entry-cover img {
+    border-radius: 6px;
+}
+
+/* ---------- Mono/terminal touches on meta + tags ---------- */
+.post-meta,
+.entry-footer,
+.post-single .post-meta {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+}
+
+.entry-tag,
+.post-tags a,
+.post-meta .post-tags a {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-radius: 3px;
+}
+
+.entry-tag:hover,
+.post-tags a:hover {
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.25);
+}
+
+/* ---------- Avatar: magenta outer glow ---------- */
+.hero-avatar {
+    box-shadow:
+        0 0 0 4px rgba(34, 211, 238, 0.12),
+        0 0 26px rgba(255, 46, 136, 0.35),
+        0 10px 28px -10px rgba(34, 211, 238, 0.45);
+}
+
+/* ---------- Headings: faint neon glow (dark only, body text untouched) ---------- */
+:root[data-theme="dark"] .post-content h1,
+:root[data-theme="dark"] .post-content h2,
+:root[data-theme="dark"] .post-title {
+    text-shadow: 0 0 18px rgba(34, 211, 238, 0.22);
+}
+
+/* ---------- Code blocks: neon-tinted frame ---------- */
+.post-content pre {
+    border: 1px solid rgba(34, 211, 238, 0.22);
+    box-shadow: 0 0 24px -12px rgba(34, 211, 238, 0.35);
+}
+
+/* ---------- Respect reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .logo > a::after {
+        animation: none;
+    }
+
+    :root[data-theme="dark"] .hero-tagline.glitch::before,
+    :root[data-theme="dark"] .hero-tagline.glitch::after {
+        animation: none;
+    }
+}
+
+/* ---------- Responsive: kicker + tagline on small screens ---------- */
+@media (max-width: 640px) {
+    .hero-kicker {
+        font-size: 12px;
+    }
+}
+
+/* ==========================================================================
+   BLADE RUNNER ITERATION — rainy neon megacity hero (Eduardo's reference)
+   The hero background is now the reference photo (rainy city, pink katakana
+   neon, cyan holo-screens, flying car). The retired assistant's name that
+   was baked into the photo was painted out of the image file itself; no
+   text from the photo is rendered anywhere on the site.
+   ========================================================================== */
+
+/* Wet-street reflection: pink/cyan glow rising from the bottom edge, plus a
+   slightly stronger left scrim so the hero copy stays readable over the
+   busier photo. (First layer = topmost.) */
+.first-entry.home-info {
+    background:
+        linear-gradient(115deg, rgba(7, 11, 31, 0.96) 28%, rgba(13, 19, 50, 0.62) 62%, rgba(7, 11, 31, 0.30) 100%),
+        linear-gradient(to top, rgba(255, 46, 136, 0.16) 0%, rgba(34, 211, 238, 0.10) 26%, transparent 55%),
+        url("/images/hero-bg.jpg") center right / cover no-repeat,
+        var(--indigo-900);
+    /* Stronger pink presence in the neon frame glow. */
+    box-shadow:
+        0 0 0 1px rgba(255, 46, 136, 0.10),
+        0 0 42px -12px rgba(34, 211, 238, 0.45),
+        0 0 64px -18px rgba(255, 46, 136, 0.50),
+        0 24px 60px -24px rgba(0, 0, 0, 0.65);
+}
+
+/* Animated rain over the hero: diagonal streaks drifting down. Pure CSS,
+   dark theme only, very low opacity so the photo and the copy stay legible. */
+.first-entry.home-info .hero-rain {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image:
+        repeating-linear-gradient(104deg, transparent 0 11px, rgba(174, 226, 255, 0.13) 11px 12px, transparent 12px 26px),
+        repeating-linear-gradient(104deg, transparent 0 23px, rgba(174, 226, 255, 0.07) 23px 24px, transparent 24px 47px);
+    background-size: 260px 240px;
+    animation: hero-rain-fall 1.4s linear infinite;
+    pointer-events: none;
+    opacity: 0.55;
+}
+
+@keyframes hero-rain-fall {
+    from { background-position: 0 -240px, 0 -240px; }
+    to   { background-position: -52px 0, -52px 0; }
+}
+
+/* Light theme: keep the rain barely-there and the photo washed out as before. */
+:root[data-theme="light"] .first-entry.home-info .hero-rain {
+    opacity: 0.16;
+}
+
+/* Respect reduced motion: freeze the rain (and the earlier blink/glitch). */
+@media (prefers-reduced-motion: reduce) {
+    .first-entry.home-info .hero-rain {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   LAYOUT ITERATION v5 — compact horizontal cards, text-led
+   Eduardo loves the cyberpunk theme; this only rebalances proportions:
+   covers shrink to a right-side thumbnail (~30% of the card), titles get
+   bigger and excerpts show 3 lines, so the text leads and more posts fit
+   on screen. Hero untouched; palette/mood unchanged.
+   ========================================================================== */
+
+/* Horizontal card: text left, thumbnail right. */
+.post-entry,
+.first-entry:not(.home-info) {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0;
+}
+
+.post-entry .entry-text,
+.first-entry:not(.home-info) .entry-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 22px 10px 22px 26px;
+}
+
+/* The text wrapper owns the padding now: drop the old full-width paddings. */
+.post-entry .entry-header,
+.post-entry .entry-content,
+.post-entry .entry-footer,
+.first-entry:not(.home-info) .entry-header,
+.first-entry:not(.home-info) .entry-content,
+.first-entry:not(.home-info) .entry-footer {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.post-entry .entry-header,
+.first-entry:not(.home-info) .entry-header {
+    padding-top: 0;
+}
+
+.post-entry .entry-footer,
+.first-entry:not(.home-info) .entry-footer {
+    padding-bottom: 0;
+}
+
+.post-entry .entry-tags,
+.first-entry:not(.home-info) .entry-tags {
+    padding: 12px 0 0;
+}
+
+/* Bigger, heavier titles that lead the card. */
+.post-entry .entry-header h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.22;
+}
+
+.first-entry:not(.home-info) .entry-header h2 {
+    font-size: 30px;
+}
+
+/* Excerpt: 3 lines instead of 2, slightly larger, more air. */
+.post-entry .entry-content,
+.first-entry:not(.home-info) .entry-content {
+    margin: 10px 0 12px;
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-line-clamp: 3;
+}
+
+/* Right-side thumbnail: ~30% of the card width, modest height, full-bleed. */
+.post-entry .entry-cover,
+.first-entry:not(.home-info) .entry-cover {
+    order: 2;
+    flex: 0 0 30%;
+    margin: 0;
+    display: flex;
+    min-height: 172px;
+}
+
+.post-entry .entry-cover img,
+.first-entry:not(.home-info) .entry-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: auto;
+    border-radius: 0;
+}
+
+/* Featured first card on section pages: same horizontal treatment, no tall
+   320px min-height from PaperMod's base. */
+.first-entry:not(.home-info) {
+    min-height: 0;
+    margin-bottom: var(--gap);
+}
+
+/* Mobile: stack, cover becomes a short strip on top. */
+@media (max-width: 680px) {
+    .post-entry,
+    .first-entry:not(.home-info) {
+        flex-direction: column;
+    }
+
+    .post-entry .entry-cover,
+    .first-entry:not(.home-info) .entry-cover {
+        order: -1;
+        flex: 0 0 auto;
+        width: 100%;
+        min-height: 0;
+    }
+
+    .post-entry .entry-cover img,
+    .first-entry:not(.home-info) .entry-cover img {
+        height: 150px;
+    }
+
+    .post-entry .entry-text,
+    .first-entry:not(.home-info) .entry-text {
+        padding: 18px 20px 20px;
+    }
+
+    .post-entry .entry-header h2 {
+        font-size: 23px;
+    }
+
+    .first-entry:not(.home-info) .entry-header h2 {
+        font-size: 25px;
+    }
+}

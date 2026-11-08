@@ -6,6 +6,10 @@ tags: ["AI Agents", "Arquitectura", "Self-Hosting", "OpenShell", "Principiantes"
 categories: ["AI & Automation"]
 author: "Ed Jaramillo"
 description: "Nadie me explicó las capas claramente, así que las explico yo. Host, WSL, Docker, sandbox, gateway — esto es lo que corre dónde."
+cover:
+  image: "cover.png"
+  alt: "Cuatro capas translúcidas de tecnología conectadas por líneas brillantes"
+  relative: true
 ShowToc: true
 ShowBreadCrumbs: true
 ---

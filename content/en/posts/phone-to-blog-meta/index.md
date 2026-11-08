@@ -6,6 +6,10 @@ tags: ["Blog", "Hugo", "GitHub Pages", "AI Agents", "Meta"]
 categories: ["AI & Automation"]
 author: "Ed Jaramillo"
 description: "No laptop. No terminal. Just a phone, Telegram, and an AI agent that pushed to GitHub while I was in bed."
+cover:
+  image: "cover.png"
+  alt: "A glowing phone on a bed at 2 AM"
+  relative: true
 ShowToc: true
 ShowBreadCrumbs: true
 ---

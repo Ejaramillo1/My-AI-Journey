@@ -6,6 +6,10 @@ tags: ["OpenAI", "DeepSeek", "Token Economics", "Cost Optimization", "LLM"]
 categories: ["AI & Automation"]
 author: "Ed Jaramillo"
 description: "I gave my AI agent a credit card and watched $20 disappear in two hours. Then I discovered DeepSeek V4 and cut costs by over 90% with no quality loss."
+cover:
+  image: "cover.png"
+  alt: "A large coin dissolving into a stream of small tokens"
+  relative: true
 ShowToc: true
 ShowBreadCrumbs: true
 ---

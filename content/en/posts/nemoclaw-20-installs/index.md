@@ -6,6 +6,10 @@ tags: ["AI Agents", "NemoClaw", "Self-Hosting", "Open Source", "Linux"]
 categories: ["AI & Automation"]
 author: "Ed Jaramillo"
 description: "Most tutorials make it look like three commands. I reinstalled this thing 20 times. Here's what the tutorials don't tell you about self-hosting AI agents."
+cover:
+  image: "cover.png"
+  alt: "A terminal window with a circular reinstall arrow"
+  relative: true
 ShowToc: true
 ShowBreadCrumbs: true
 ---

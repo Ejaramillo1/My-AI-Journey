@@ -6,6 +6,10 @@ tags: ["AI Agents", "Architecture", "Self-Hosting", "OpenShell", "Beginners"]
 categories: ["AI & Automation"]
 author: "Ed Jaramillo"
 description: "Nobody explained the layers clearly to me, so I'll explain them now. Host, WSL, Docker, sandbox, gateway — here's what runs where."
+cover:
+  image: "cover.png"
+  alt: "Four stacked translucent technology layers connected by glowing lines"
+  relative: true
 ShowToc: true
 ShowBreadCrumbs: true
 ---

@@ -6,6 +6,10 @@ tags: ["AI Agents", "Beginners", "Self-Hosting", "No-Code", "Productivity"]
 categories: ["AI & Automation"]
 author: "Ed Jaramillo"
 description: "I'm not a software engineer. I'm a pricing analyst. And I run my own AI agent 24/7. Here's what nobody told me about getting started."
+cover:
+  image: "cover.png"
+  alt: "A person at a desk with a laptop and a small glowing robot assistant"
+  relative: true
 ShowToc: true
 ShowBreadCrumbs: true
 ---

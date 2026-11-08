@@ -13,6 +13,13 @@ enableEmoji = true
 [params]
   author = "Ed Jaramillo"
   description = "Building AI agents, automating workflows, and learning in public."
+  defaultTheme = "dark"
+  ShowReadingTime = true
+  ShowShareButtons = true
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  DateFormat = "January 2, 2006"
 
   [[params.socialIcons]]
     name = "github"
@@ -24,11 +31,14 @@ enableEmoji = true
     name = "email"
     url = "mailto:ejaramillobarrera@gmail.com"
 
+  [params.footer]
+    text = "Economist by training. Agent researcher by craft."
+
   [params.homeInfoParams]
     Title = "Hi, I'm Ed 👋"
+    Tagline = "Economist by training. Agent researcher by craft."
     Content = """
-    I'm learning to build AI agents and automate my life — one install at a time.
-    This is my public journal.
+I'm learning to build AI agents and automate my life — one install at a time. This is my public journal: honest notes on self-hosted agents, token economics, and the systems that run my life.
     """
 
   [params.fuseOpts]
