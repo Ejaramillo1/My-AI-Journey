@@ -8,9 +8,11 @@ cover:
   alt: "Rainy neon city street in pink and cyan, the visual motif of the blog"
 ---
 
-## Hi, I'm Ed Jaramillo
+## Hi, I'm José Eduardo Jaramillo
 
 *Economist by training. Agent researcher by craft.*
+
+Most people call me Ed.
 
 I'm a **Research Engineer, Agentic Platforms**, at Teradata, based in Tijuana, Mexico. I research agent memory, evaluation, and observability for the Loom agent framework. Before this role I worked in competitive pricing, TCO modeling, and helping enterprise customers understand the value of data platforms.
 

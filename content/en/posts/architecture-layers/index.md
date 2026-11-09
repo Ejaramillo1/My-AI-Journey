@@ -4,7 +4,7 @@ date: 2026-05-21
 draft: false
 tags: ["AI Agents", "Architecture", "Self-Hosting", "OpenShell", "Beginners"]
 categories: ["AI & Automation"]
-author: "Ed Jaramillo"
+author: "José Eduardo Jaramillo"
 description: "Nobody explained the layers clearly to me, so I'll explain them now. Host, WSL, Docker, sandbox, gateway — here's what runs where."
 cover:
   image: "cover.png"

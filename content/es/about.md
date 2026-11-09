@@ -8,9 +8,11 @@ cover:
   alt: "Rainy neon city street in pink and cyan, the visual motif of the blog"
 ---
 
-## Hola, soy Ed Jaramillo
+## Hola, soy José Eduardo Jaramillo
 
 *Economista de formación. Investigador de agentes por oficio.*
+
+La mayoría me dice Ed.
 
 Soy **Ingeniero de Investigación, Plataformas de Agentes**, en Teradata, viviendo en Tijuana, México. Investigo memoria de agentes, evaluación y observabilidad para el framework de agentes Loom. Antes de este puesto trabajé en estrategia de precios competitivos, modelos TCO, y ayudé a clientes enterprise a entender el valor de las plataformas de datos.
 

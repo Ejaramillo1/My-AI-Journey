@@ -5,3 +5,26 @@
 <meta name="theme-color" content="#070b1f">
 <link rel="icon" type="image/png" href="{{ "favicon.png" | relURL }}">
 <link rel="apple-touch-icon" href="{{ "apple-touch-icon.png" | relURL }}">
+
+{{/* SEO: Person structured data — author entity for José Eduardo Jaramillo.
+     Complements PaperMod's built-in Organization (home) and BlogPosting (posts)
+     schemas, which pick up the author name from params/frontmatter. */}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "https://ejaramillo1.github.io/My-AI-Journey/#person",
+  "name": "José Eduardo Jaramillo",
+  "alternateName": "Ed Jaramillo",
+  "url": "https://ejaramillo1.github.io/My-AI-Journey/",
+  "jobTitle": "Research Engineer, Agentic Platforms",
+  "worksFor": { "@type": "Organization", "name": "Teradata", "url": "https://www.teradata.com" },
+  "alumniOf": { "@type": "EducationalOrganization", "name": "Universidad Autónoma de Baja California" },
+  "knowsAbout": ["Agent Memory", "LLM Evaluation", "Agent Observability", "Agentic AI", "Multi-Agent Systems", "Game Theory", "Econometrics"],
+  "sameAs": [
+    "https://github.com/Ejaramillo1",
+    "https://www.linkedin.com/in/jose-eduardo-jaramillo",
+    "https://ejaramillo1.github.io/My-AI-Journey/"
+  ]
+}
+</script>

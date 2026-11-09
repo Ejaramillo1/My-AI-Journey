@@ -4,7 +4,7 @@ date: 2026-05-21
 draft: false
 tags: ["AI Agents", "Beginners", "Self-Hosting", "No-Code", "Productivity"]
 categories: ["AI & Automation"]
-author: "Ed Jaramillo"
+author: "José Eduardo Jaramillo"
 description: "I'm not a software engineer. I'm a pricing analyst. And I run my own AI agent 24/7. Here's what nobody told me about getting started."
 cover:
   image: "cover.png"

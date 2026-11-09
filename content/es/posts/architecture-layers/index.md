@@ -4,7 +4,7 @@ date: 2026-05-21
 draft: false
 tags: ["AI Agents", "Arquitectura", "Self-Hosting", "OpenShell", "Principiantes"]
 categories: ["AI & Automation"]
-author: "Ed Jaramillo"
+author: "José Eduardo Jaramillo"
 description: "Nadie me explicó las capas claramente, así que las explico yo. Host, WSL, Docker, sandbox, gateway — esto es lo que corre dónde."
 cover:
   image: "cover.png"

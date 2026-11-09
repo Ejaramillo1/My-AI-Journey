@@ -10,9 +10,13 @@ enableEmoji = true
 [pagination]
   pagerSize = 10
 
+[outputs]
+  home = ["HTML", "RSS", "ROBOTS"]
+
 [params]
-  author = "Ed Jaramillo"
-  description = "Building AI agents, automating workflows, and learning in public."
+  author = "José Eduardo Jaramillo"
+  description = "José Eduardo Jaramillo, Research Engineer (Agentic Platforms) at Teradata — agent memory, evaluation, observability. Building AI agents, learning in public."
+  keywords = ["José Eduardo Jaramillo", "Agent Memory", "AI Agents", "LLM Evaluation", "Agent Observability", "Agentic AI", "Loom", "Teradata", "Economist"]
   defaultTheme = "dark"
   ShowReadingTime = true
   ShowShareButtons = true
@@ -38,7 +42,7 @@ enableEmoji = true
     Title = "Hi, I'm Ed 👋"
     Tagline = "Economist by training. Agent researcher by craft."
     Content = """
-I'm learning to build AI agents and automate my life — one install at a time. This is my public journal: honest notes on self-hosted agents, token economics, and the systems that run my life.
+I'm José Eduardo Jaramillo, a Research Engineer in Agentic Platforms at Teradata. I'm learning to build AI agents and automate my life — one install at a time. This is my public journal: honest notes on self-hosted agents, token economics, and the systems that run my life.
     """
 
   [params.fuseOpts]
@@ -59,7 +63,7 @@ DefaultContentLanguage = "en"
     weight = 1
     title = "My AI Journey"
     [languages.en.params]
-      description = "Building AI agents, automating workflows, and learning in public"
+      description = "José Eduardo Jaramillo, Research Engineer (Agentic Platforms) at Teradata — agent memory, evaluation, observability. Building AI agents, learning in public"
 
   [languages.es]
     languageName = "Español"
@@ -67,7 +71,7 @@ DefaultContentLanguage = "en"
     weight = 2
     title = "My AI Journey"
     [languages.es.params]
-      description = "Construyendo agentes de IA, automatizando workflows y aprendiendo en público"
+      description = "José Eduardo Jaramillo, Ingeniero de Investigación en Teradata — memoria de agentes, evaluación y observabilidad. Construyendo agentes de IA y aprendiendo en público"
 
 [markup]
   [markup.goldmark]

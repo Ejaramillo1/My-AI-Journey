@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ejaramillo1.github.io/My-AI-Journey/sitemap.xml

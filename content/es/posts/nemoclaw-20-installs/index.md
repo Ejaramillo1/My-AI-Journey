@@ -4,7 +4,7 @@ date: 2026-05-21
 draft: false
 tags: ["Agentes IA", "NemoClaw", "Self-Hosting", "Open Source", "Linux"]
 categories: ["IA y Automatización"]
-author: "Ed Jaramillo"
+author: "José Eduardo Jaramillo"
 description: "La mayoría de los tutoriales te dicen que son tres comandos. Lo reinstalé 20 veces. Esto es lo que los tutoriales no te cuentan sobre hospedar tu propio agente de IA."
 cover:
   image: "cover.png"

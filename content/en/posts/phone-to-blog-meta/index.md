@@ -4,7 +4,7 @@ date: 2026-05-21
 draft: false
 tags: ["Blog", "Hugo", "GitHub Pages", "AI Agents", "Meta"]
 categories: ["AI & Automation"]
-author: "Ed Jaramillo"
+author: "José Eduardo Jaramillo"
 description: "No laptop. No terminal. Just a phone, Telegram, and an AI agent that pushed to GitHub while I was in bed."
 cover:
   image: "cover.png"

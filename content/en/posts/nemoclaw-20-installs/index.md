@@ -4,7 +4,7 @@ date: 2026-05-21
 draft: false
 tags: ["AI Agents", "NemoClaw", "Self-Hosting", "Open Source", "Linux"]
 categories: ["AI & Automation"]
-author: "Ed Jaramillo"
+author: "José Eduardo Jaramillo"
 description: "Most tutorials make it look like three commands. I reinstalled this thing 20 times. Here's what the tutorials don't tell you about self-hosting AI agents."
 cover:
   image: "cover.png"
