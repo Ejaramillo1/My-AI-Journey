@@ -8,7 +8,7 @@ cover:
   alt: "Rainy neon city street in pink and cyan, the visual motif of the blog"
 ---
 
-## Hola, soy José Eduardo Jaramillo
+## Hola, soy Eduardo Jaramillo
 
 *Economista de formación. Investigador de agentes por oficio.*
 
