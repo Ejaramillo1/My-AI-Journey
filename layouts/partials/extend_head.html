@@ -8,9 +8,13 @@
 
 {{/* SEO: Person structured data, generated from data/identity.yaml, the
      single source of truth. Visible UI uses displayName; structured data
-     uses the full formal name. Complements PaperMod's built-in Organization
-     (home) and BlogPosting (posts) schemas, which pick up the author name
-     from params/frontmatter. */}}
+     uses the full formal name. The description follows the page language
+     (descriptionEs on Spanish pages). Complements PaperMod's built-in
+     Organization (home) and BlogPosting (posts) schemas; the BlogPosting
+     author link and the About ProfilePage come from the PaperMod
+     schema-partial override in layouts/_partials/templates/schema_json.html,
+     which links both to this Person entity by @id. */}}
+{{ $lang := .Lang }}
 {{ with .Site.Data.identity }}
 {{ $alumni := index .education 0 }}
 {{ $person := dict
@@ -25,9 +29,9 @@
   "jobTitle" .jobTitle
   "worksFor" (dict "@type" "Organization" "name" .organization.name "url" .organization.url "department" (dict "@type" "Organization" "name" .organization.department))
   "alumniOf" (dict "@type" "EducationalOrganization" "name" $alumni.institution "alternateName" $alumni.institutionShort "url" $alumni.institutionUrl)
-  "description" .description
+  "description" (cond (eq $lang "es") .descriptionEs .description)
   "knowsAbout" .knowsAbout
-  "sameAs" (slice .profiles.github .profiles.linkedin .profiles.orcid .profiles.medium .profiles.substackAuthorProfile)
+  "sameAs" (slice .profiles.github .profiles.githubSecond .profiles.linkedin .profiles.orcid .profiles.medium .profiles.substackAuthorProfile)
 }}
 <script type="application/ld+json">
 {{ $person | jsonify | safeJS }}

@@ -50,6 +50,25 @@ enableEmoji = true
     name = "substack"
     url = "https://edjaramilloaijourney.substack.com"
 
+  # Phase III-A item A5, revised per ChatGPT review
+  # (CGPT-MAJ-REVIEW-001-RESP): the homepage Organization block (PaperMod
+  # schema) describes the site/publication "My AI Journey", and sameAs
+  # asserts the SAME entity, not its founder/author. So Organization
+  # sameAs holds only URLs that are the publication itself under another
+  # address: the Substack publication URL (the same publication, hosted
+  # on Substack). The four personal profiles (GitHub, LinkedIn, Medium
+  # author profile, ORCID) describe Eduardo the person, not the
+  # publication — they belong only in Person sameAs
+  # (data/identity.yaml). The mailto: contact is a contact method, not
+  # an identity profile, and the Teradata Labs Medium publication is a
+  # different publication, so neither qualifies. Without this list
+  # PaperMod builds sameAs from the socialIcons above, personal profiles
+  # and mailto: included.
+  [params.schema]
+    sameAs = [
+      "https://edjaramilloaijourney.substack.com",
+    ]
+
   [params.footer]
     text = "Economist by training. Agent researcher by craft."
 
