@@ -1,0 +1,10 @@
+# Test-only config override for the authorship fixtures.
+#
+# Layered after hugo.toml (hugo --config hugo.toml,<this file>) it points
+# both languages at the fixture content, so the fixture build contains
+# only the three test posts. The ES fixture directory is intentionally
+# empty: no Spanish fixtures exist yet. Never used for a real build.
+[languages.en]
+contentDir = "scripts/fixtures/content/en"
+[languages.es]
+contentDir = "scripts/fixtures/content/es"

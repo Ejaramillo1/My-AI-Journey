@@ -13,11 +13,17 @@
         author string (guest/co-author) keeps the theme's name behavior,
         and multi-author lists are untouched.
      2. ProfilePage: pages with `profilePage: true` in frontmatter (EN/ES
-        About) additionally emit a ProfilePage block whose mainEntity is
-        the Person @id reference. No other page emits ProfilePage.
-     The Organization block (homepage) is UNCHANGED here; its narrowed
-     sameAs (no mailto:) comes from [params.schema] sameAs in hugo.toml,
-     which the theme partial already supports (Phase III-A item A5). */}}
+        About) emit a ProfilePage block INSTEAD of a BlogPosting — the
+        page is not a blog post. The ProfilePage identifies the page
+        itself by @id/url (its canonical permalink) and links mainEntity
+        to the Person @id reference. No other page emits ProfilePage, and
+        no profilePage page emits BlogPosting. Revised per ChatGPT review
+        (CGPT-MAJ-REVIEW-001-RESP): the first version emitted both.
+     The Organization block (homepage) is UNCHANGED here; its sameAs
+     (Substack publication URL only, no personal profiles, no mailto:)
+     comes from [params.schema] sameAs in hugo.toml, which the theme
+     partial already supports (Phase III-A item A5, revised per the same
+     review). */}}
 {{ if .IsHome }}
 <script type="application/ld+json">
 {
@@ -80,6 +86,26 @@
 }
 </script>
 {{- if .IsPage }}
+{{- if .Params.profilePage }}
+{{/* ProfilePage (Phase III-A, revised per review): the About page
+     describes the person, so it emits a ProfilePage INSTEAD of a
+     BlogPosting — the page is not a blog post. The page itself is
+     identified by @id/url (its canonical permalink); mainEntity links
+     to the authoritative Person entity by @id. The Person block itself
+     is emitted on every page by layouts/partials/extend_head.html. */}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "@id": {{ .Permalink | safeHTML }},
+  "url": {{ .Permalink | safeHTML }},
+  "mainEntity": {
+    "@type": "Person",
+    "@id": {{ .Site.Data.identity.personId }}
+  }
+}
+</script>
+{{- else }}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -148,22 +174,7 @@
   }
 }
 </script>
-{{- if .Params.profilePage }}
-{{/* ProfilePage (Phase III-A): the About page describes the person; link
-     it to the authoritative Person entity by @id instead of duplicating
-     the entity here. The Person block itself is emitted on every page by
-     layouts/partials/extend_head.html. */}}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "ProfilePage",
-  "mainEntity": {
-    "@type": "Person",
-    "@id": {{ .Site.Data.identity.personId }}
-  }
-}
-</script>
-{{- end }}
+{{- end }}{{/* profilePage if/else end */}}
 {{- end }}{{/* .IsPage end */}}
 
 {{- end -}}
