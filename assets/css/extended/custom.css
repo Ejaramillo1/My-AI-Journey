@@ -3,6 +3,23 @@
    Overrides PaperMod's CSS variables and restyles the hero, cards and type.
    Loaded automatically: PaperMod picks up everything in assets/css/extended/. */
 
+/* ---------- Phase III-D, D4: wider landing shell (1120px) ----------
+   PaperMod defaults to a 720px reading width everywhere (--main-width).
+   On list pages (home, blog index, sections, tags, archives, search) the
+   shell widens to 1120px so the hero and post cards use the desktop width;
+   single pages (posts, About) keep the 720px reading width because
+   baseof.html only puts class="list" on <body> for non-page kinds.
+   Header aligns with the shell on list pages: --nav-width 1120px gives a
+   1168px outer header, same as .main (1120 + 2*24 gap). Revisit 1120
+   against screenshots if needed; exploratory band 1100-1280px. */
+:root {
+    --nav-width: 1120px;
+}
+
+body.list {
+    --main-width: 1120px;
+}
+
 /* ---------- Fonts ---------- */
 :root {
     --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
