@@ -877,6 +877,213 @@ code, pre, kbd {
 }
 
 /* ==========================================================================
+   PHASE III-D, B3 — profile-first publication hub (25 Nov 2026)
+   Approved direction (Eduardo, Ari CGPT-MAJ-V06-EXECUTION-015):
+   70/30 grid, profile panel over the cyberpunk hero background, enlarged
+   social buttons, right column = Selected publications (3 verified
+   pieces) + a separate "More on Substack" CTA. No post list on home;
+   /posts/ keeps the full list. Home shell widens to 1360px (D4's 1120px
+   stays for every other list page). The profile panel reuses the
+   existing .first-entry.home-info hero treatment (hero-bg, rain, grid,
+   scanlines, light-theme wash); only the panel's new elements and the
+   publications column get styles here.
+   ========================================================================== */
+
+/* Home shell: 1360px (body gets the `home` class from layouts/baseof.html). */
+body.list.home {
+    --main-width: 1360px;
+    --nav-width: 1360px;
+}
+
+.home-hub {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 48px;
+    align-items: start;
+}
+
+/* ---------- Profile panel: new elements ---------- */
+.profile-eyebrow {
+    margin: 0 0 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+}
+
+:root[data-theme="light"] .profile-eyebrow {
+    color: var(--accent-deep);
+}
+
+.profile-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.profile-chips li {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(7, 11, 31, 0.45);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--content);
+}
+
+:root[data-theme="light"] .profile-chips li {
+    background: rgba(255, 255, 255, 0.65);
+}
+
+/* Enlarged social buttons: 54px circles with the real PaperMod icons. */
+.profile-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 26px;
+}
+
+.profile-social a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    width: 64px;
+    text-decoration: none;
+}
+
+.profile-social a svg {
+    width: 54px;
+    height: 54px;
+    padding: 13px;
+    border-radius: 50%;
+    border: 1px solid rgba(34, 211, 238, 0.45);
+    background: rgba(7, 11, 31, 0.72);
+    color: var(--accent-soft);
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profile-social a:hover svg {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+}
+
+.profile-social a span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--secondary);
+}
+
+/* ---------- Publications column ---------- */
+.pub-col {
+    padding-top: 8px;
+    min-width: 0;
+}
+
+.pub-col h2 {
+    margin: 0 0 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--secondary);
+}
+
+.pub-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pub {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.pub-plat {
+    margin: 0 0 6px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+}
+
+:root[data-theme="light"] .pub-plat {
+    color: var(--accent-deep);
+}
+
+.pub h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+}
+
+.pub h3 a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.pub h3 a:hover {
+    color: var(--accent-soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.pub-date {
+    margin: 7px 0 0;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--secondary);
+}
+
+.pub-cta {
+    display: inline-block;
+    margin-top: 20px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-soft);
+    text-decoration: none;
+}
+
+:root[data-theme="light"] .pub-cta {
+    color: var(--accent-deep);
+}
+
+.pub-cta:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ---------- B3 responsive: stack the columns ---------- */
+@media (max-width: 900px) {
+    .home-hub {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+    }
+
+    .pub-col {
+        padding-top: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-social {
+        gap: 12px;
+    }
+}
+
+/* ==========================================================================
    LAYOUT ITERATION v5 — compact horizontal cards, text-led
    Eduardo loves the cyberpunk theme; this only rebalances proportions:
    covers shrink to a right-side thumbnail (~30% of the card), titles get

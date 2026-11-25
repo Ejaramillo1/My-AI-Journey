@@ -1,0 +1,62 @@
+{{/* Homepage: profile-first publication hub (Phase III-D, B3).
+   Approved direction (Eduardo 25 Nov 2026, Ari CGPT-MAJ-V06-EXECUTION-015):
+   70/30 grid, profile panel over the cyberpunk hero background, social
+   buttons enlarged, right column = Selected publications (3 verified
+   pieces) + a separate "More on Substack" CTA. No blog post list on the
+   home page; /posts/ keeps the full list. One H1: the display name.
+   All identity strings come from data/identity.yaml; nothing is
+   hardcoded here except the EN/ES labels. */}}
+{{- define "main" }}
+{{- $id := site.Data.identity }}
+{{- $isEs := eq site.Language.Lang "es" }}
+{{- $socials := slice
+  (dict "name" "github" "label" "GitHub" "url" $id.profiles.github)
+  (dict "name" "linkedin" "label" "LinkedIn" "url" $id.profiles.linkedin)
+  (dict "name" "orcid" "label" "ORCID" "url" $id.profiles.orcid)
+  (dict "name" "medium" "label" "Medium" "url" $id.profiles.medium)
+  (dict "name" "substack" "label" "Substack" "url" $id.profiles.substackPublication)
+}}
+<div class="home-hub">
+  <section class="first-entry home-info profile-panel" aria-label="{{ $id.displayName }}">
+    <div class="hero-rain" aria-hidden="true"></div>
+    <p class="profile-eyebrow">{{ $id.jobTitle }} · {{ $id.organization.name }}</p>
+    <header class="entry-header">
+      <h1>{{ $id.displayName }}</h1>
+    </header>
+    <p class="hero-tagline">{{ $id.tagline }}</p>
+    <div class="entry-content md-content">
+      <p>{{ if $isEs }}{{ $id.bioEs }}{{ else }}{{ $id.bio }}{{ end }}</p>
+    </div>
+    <ul class="profile-chips" aria-label="{{ if $isEs }}Temas de investigación{{ else }}Research topics{{ end }}">
+      {{- range first 4 $id.knowsAbout }}
+      <li>{{ . }}</li>
+      {{- end }}
+    </ul>
+    <div class="profile-social">
+      {{- range $socials }}
+      <a href="{{ .url }}" target="_blank" rel="noopener noreferrer me" title="{{ .label }}" aria-label="{{ .label }}">
+        {{ partial "svg.html" (dict "name" .name) }}
+        <span>{{ .label }}</span>
+      </a>
+      {{- end }}
+    </div>
+    <div class="hero-buttons">
+      <a class="hero-btn-ghost" href="{{ "about/" | relLangURL }}">{{ if $isEs }}Acerca de mí{{ else }}About me{{ end }}</a>
+    </div>
+  </section>
+
+  <section class="pub-col" aria-labelledby="pub-heading">
+    <h2 id="pub-heading">{{ if $isEs }}Publicaciones seleccionadas{{ else }}Selected publications{{ end }}</h2>
+    <ul class="pub-list">
+      {{- range $id.publications }}
+      <li class="pub">
+        <p class="pub-plat">{{ .platform }} · {{ .publication }}</p>
+        <h3><a href="{{ .url }}" target="_blank" rel="noopener" aria-label="{{ .title }} — {{ .platform }}, {{ if $isEs }}se abre en una pestaña nueva{{ else }}opens in a new tab{{ end }}">{{ .title }} <span aria-hidden="true">↗</span></a></h3>
+        <p class="pub-date">{{ if $isEs }}{{ .dateLabelEs }}{{ else }}{{ .dateLabel }}{{ end }}</p>
+      </li>
+      {{- end }}
+    </ul>
+    <a class="pub-cta" href="{{ $id.profiles.substackPublication }}" target="_blank" rel="noopener" aria-label="{{ if $isEs }}Más en Substack, se abre en una pestaña nueva{{ else }}More on Substack, opens in a new tab{{ end }}">{{ if $isEs }}Más en Substack{{ else }}More on Substack{{ end }} <span aria-hidden="true">→</span></a>
+  </section>
+</div>
+{{- end }}
