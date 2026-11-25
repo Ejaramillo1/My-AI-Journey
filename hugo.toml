@@ -72,13 +72,6 @@ enableEmoji = true
   [params.footer]
     text = "Economist by training. Agent researcher by craft."
 
-  [params.homeInfoParams]
-    Title = "Hi, I'm Ed 👋"
-    Tagline = "Economist by training. Agent researcher by craft."
-    Content = """
-I'm Eduardo Jaramillo, a Research Engineer in Agentic Platforms at Teradata. I'm learning to build AI agents and automate my life — one install at a time. This is my public journal: honest notes on self-hosted agents, token economics, and the systems that run my life.
-    """
-
   [params.fuseOpts]
     isCaseSensitive = false
     shouldSort = true

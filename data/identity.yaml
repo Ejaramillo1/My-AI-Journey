@@ -74,6 +74,52 @@ profiles:
 tagline: "I test whether AI agents actually work: memory, evaluation, observability."
 oneLiner: "Economist by training. Agent researcher by craft."
 
+# Homepage bio (Phase III-D, publication hub). Wording proposed by Ari in
+# CGPT-MAJ-V06-EXECUTION-015 (25 Nov 2026) from the old "public journal"
+# copy; the ES version is Hilo's translation of the same text. Both are
+# proposed copy for Eduardo's approval via the PR, not final until merged.
+# Replaces the old homeInfoParams.Content in hugo.toml (removed with it).
+bio: "Economist by training. Agent researcher by craft. I work in Teradata's Office of the CTO, exploring the reliability, evaluation and observability of AI agents. This is the central home of my research, engineering work and writing."
+bioEs: "Economista de formación. Investigador de agentes por oficio. Trabajo en la Oficina del CTO de Teradata, explorando la confiabilidad, la evaluación y la observabilidad de los agentes de IA. Este es el hogar central de mi investigación, mi trabajo de ingeniería y mis escritos."
+
+# Selected publications (Phase III-D, publication hub). The homepage right
+# column lists these and only these; each links to its canonical home.
+# Titles are the exact source titles (Ari, CGPT-MAJ-V06-EXECUTION-015):
+# both Medium pages display short H1 titles, but their metadata
+# (Additional Details / Name) carries the long titles below, and the
+# Substack cross-posts use the same long titles. Short display titles
+# only if the owner approves them. Dates verified live 25 Nov 2026:
+# Medium article pages (Nov 18 / Nov 20) and the Substack archive +
+# post pages (COO published 2026-11-24T03:41:48Z; Mastermind cross-post
+# 2026-11-25T00:41:46Z; Dennett cross-post 2026-11-25T00:44:27Z).
+# The Substack publication homepage is NOT a publication: it lives as a
+# separate "More on Substack" CTA under the list. No LinkedIn/Facebook/X
+# entries: no distinct publication with a verifiable canonical URL was
+# found there (the Nov 20 LinkedIn share is a share of the Dennett
+# article, not a separate piece).
+publications:
+  - title: "Does AI Agent Memory Actually Work? A Statistically Rigorous Experiment With 200 Mastermind Games"
+    platform: Medium
+    publication: Teradata Labs
+    date: 2026-11-18
+    dateLabel: "Nov 18, 2026"
+    dateLabelEs: "18 nov 2026"
+    url: https://medium.com/teradata-labs/does-ai-agent-memory-actually-work-a-statistically-rigorous-experiment-with-200-mastermind-games-a389ccf951c0
+  - title: "Daniel Dennett's Thinking Tools for AI Agents: Surely Alarm, Intuition Pumps, and Reductio ad Absurdum"
+    platform: Medium
+    publication: Teradata Labs
+    date: 2026-11-20
+    dateLabel: "Nov 20, 2026"
+    dateLabelEs: "20 nov 2026"
+    url: https://medium.com/teradata-labs/daniel-dennetts-thinking-tools-for-ai-agents-surely-alarm-intuition-pumps-and-reductio-ad-7c27989e966c
+  - title: "Muse Is the COO of My House"
+    platform: Substack
+    publication: My AI Journey
+    date: 2026-11-23
+    dateLabel: "Nov 23, 2026"
+    dateLabelEs: "23 nov 2026"
+    url: https://edjaramilloaijourney.substack.com/p/muse-is-the-coo-of-my-house
+
 # Site descriptions, verbatim from hugo.toml (kept in sync with it).
 description: "Eduardo Jaramillo, Research Engineer (Agentic Platforms) at Teradata — agent memory, evaluation, observability. Building AI agents, learning in public."
 descriptionEs: "Eduardo Jaramillo, Ingeniero de Investigación en Teradata — memoria de agentes, evaluación y observabilidad. Construyendo agentes de IA y aprendiendo en público"
