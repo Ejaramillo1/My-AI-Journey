@@ -1,0 +1,118 @@
+# data/identity.yaml — SINGLE SOURCE OF TRUTH for professional identity.
+#
+# Everything that names Eduardo, his role, his profiles, or his research
+# interests on this site should read from this file (directly, or via the
+# params that mirror it in hugo.toml). Do not hardcode identity strings in
+# templates, partials, or post frontmatter; change them here and they
+# propagate.
+#
+# Name rule (owner decision, 24 Nov 2026):
+#   - Visible UI (hero, About headings, meta descriptions) uses displayName.
+#   - Formal contexts (structured data, authorship bylines) use fullName.
+#   - alternateNames covers the other two forms people search for.
+# Primary GitHub identity is Ejaramillo1. Ed-Jaramillo is a second account
+# used only for the Loom fork; it is not listed here as a primary profile.
+
+fullName: José Eduardo Jaramillo Barrera
+givenName: José Eduardo
+familyName: Jaramillo Barrera
+displayName: Eduardo Jaramillo
+alternateNames:
+  - Eduardo Jaramillo Barrera
+  - Ed Jaramillo
+
+jobTitle: Research Engineer, Agentic Platforms
+organization:
+  name: Teradata
+  url: https://www.teradata.com
+  department: Office of the Chief Technology Officer (OCTO)
+location: Tijuana, Mexico
+
+education:
+  - level: bachelor
+    degree: Bachelor's degree in Economics
+    institution: Universidad Autónoma de Baja California
+    institutionShort: UABC
+    institutionUrl: https://www.uabc.mx
+  - level: master
+    degree: Master of Science in Economic Sciences
+    institution: Universidad Autónoma de Baja California
+    institutionShort: UABC
+    institutionUrl: https://www.uabc.mx
+    thesisTitle: Estimación del valor de mercado de talento emprendedor por entidad federativa en México y su influencia en la probabilidad de emprender
+    thesisRecordUrl: https://cienciaabierta.uabc.mx/Record/repositorioinstitucional-20.500.12930-5500
+    thesisYear: 2017
+
+orcid:
+  id: 0009-0002-0889-4830
+  url: https://orcid.org/0009-0002-0889-4830
+
+profiles:
+  github: https://github.com/Ejaramillo1
+  linkedin: https://www.linkedin.com/in/jose-eduardo-jaramillo
+  orcid: https://orcid.org/0009-0002-0889-4830
+  medium: https://medium.com/@ejaramillobarrera
+  # Teradata Labs is a publication Eduardo writes for, not a personal
+  # profile. It must never appear in Person.sameAs.
+  mediumPublication: https://medium.com/teradata-labs
+  # Substack is two different things: the personal author profile (identity,
+  # belongs in Person.sameAs) and the My AI Journey publication he authors
+  # (visible link only, never in sameAs).
+  substackAuthorProfile: https://substack.com/@jeduardojaramillo
+  substackPublication: https://edjaramilloaijourney.substack.com
+  email: mailto:ejaramillobarrera@gmail.com
+
+tagline: "I test whether AI agents actually work: memory, evaluation, observability."
+oneLiner: "Economist by training. Agent researcher by craft."
+
+# Site descriptions, verbatim from hugo.toml (kept in sync with it).
+description: "Eduardo Jaramillo, Research Engineer (Agentic Platforms) at Teradata — agent memory, evaluation, observability. Building AI agents, learning in public."
+descriptionEs: "Eduardo Jaramillo, Ingeniero de Investigación en Teradata — memoria de agentes, evaluación y observabilidad. Construyendo agentes de IA y aprendiendo en público"
+
+knowsAbout:
+  - Agent Memory
+  - LLM Evaluation
+  - Agent Observability
+  - Agentic AI
+  - Multi-Agent Systems
+  - Game Theory
+  - Econometrics
+  - AI Reliability
+  - Economics
+  - Human-AI Interaction
+  - Statistical Experimentation
+
+# Research interests, grouped in three domains. Data only in this phase;
+# dedicated Research pages that render these groups land in a later phase.
+researchInterests:
+  - domain: Artificial Intelligence and Agentic Systems
+    topics:
+      - Agentic AI
+      - Multi-Agent Systems
+      - Large Language Model Evaluation
+      - AI Agent Memory
+      - AI Reliability
+      - AI Observability
+      - AI Safety and Alignment
+      - Mechanistic Interpretability
+  - domain: Economics and Social Sciences
+    topics:
+      - Computational Economics
+      - Economics of Artificial Intelligence
+      - Human Capital
+      - Entrepreneurship
+      - Game Theory
+      - Behavioral Economics
+      - Experimental Economics
+      - Econometrics
+  - domain: Human-AI Collaboration
+    topics:
+      - Human-AI Interaction
+      - Augmented Human Intelligence
+      - Human-AI Decision-Making
+      - Human-Centered AI
+      - Collective Intelligence
+      - Human-AI Leadership
+
+siteUrl: https://ejaramillo1.github.io/My-AI-Journey/
+personId: https://ejaramillo1.github.io/My-AI-Journey/#person
