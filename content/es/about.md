@@ -3,6 +3,11 @@ title: "Acerca de"
 date: 2026-05-21
 draft: false
 layout: "page"
+# Full-name author (fixes debt D6: PaperMod fell back to params.author,
+# "Eduardo Jaramillo") and ProfilePage flag (Phase III-A: this page emits
+# a ProfilePage block with the Person entity as mainEntity).
+author: "José Eduardo Jaramillo Barrera"
+profilePage: true
 cover:
   image: "images/hero-bg.jpg"
   alt: "Rainy neon city street in pink and cyan, the visual motif of the blog"

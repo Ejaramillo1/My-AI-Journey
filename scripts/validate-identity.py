@@ -16,16 +16,27 @@ What it checks, on every built page that should carry the Person entity
 * the Person ``@id``, ``name``, ``alternateName``, ``sameAs`` and
   ``knowsAbout`` are identical on all pages and equal to the values in
   ``data/identity.yaml``;
+* the Person ``description`` matches the page language: the EN description
+  on English pages, ``descriptionEs`` on Spanish pages;
 * no ``Person`` ``sameAs`` array on any page contains a publication URL
   (the My AI Journey Substack publication or the Teradata Labs Medium
-  publication).
+  publication);
+* every ``BlogPosting`` block links its author to the Person entity:
+  ``author`` is exactly ``{"@type": "Person", "@id": <personId>}``;
+* EN + ES About pages emit exactly one ``ProfilePage`` block whose
+  ``mainEntity`` is ``{"@type": "Person", "@id": <personId>}``; no other
+  page emits a ``ProfilePage`` block;
+* EN + ES homepages emit exactly one ``Organization`` block whose
+  ``sameAs`` is the narrowed list (the four author-profile URLs plus the
+  My AI Journey Substack publication URL, no ``mailto:``); no other page
+  emits an ``Organization`` block.
 
-Note on scope: PaperMod's built-in ``Organization`` block on the homepage
-also carries a ``sameAs`` list, built from the site's ``socialIcons``. That
-block describes the *site/publication* ("My AI Journey"), not the person, so
-the publication URL legitimately appears there; this test deliberately
-checks the ``Person`` block only. Changing the Organization block is
-out of scope for this test.
+Note on scope: the ``Organization`` block describes the *site/publication*
+("My AI Journey"), not the person, so the publication URL legitimately
+appears there; the ``mailto:`` contact does not belong in any ``sameAs``
+list. The narrowed Organization ``sameAs`` is enforced here (Phase III-A,
+item A5); the Person block is checked separately and must stay free of
+publication URLs.
 
 Expected values are read from ``data/identity.yaml`` at run time (looked up
 as the ``data`` directory next to the given ``public/`` directory, i.e. the
@@ -35,10 +46,9 @@ used. The YAML reader below is deliberately minimal: it parses just the
 top-level scalars, the two string lists, and the flat ``profiles:`` mapping
 that this test needs, and ignores everything else in the file.
 
-Limitations: this checks the *generated* Person block only. It does not
-validate PaperMod's built-in ``BlogPosting``/``WebPage`` blocks, and it does
-not replace the Google Rich Results Test or the Schema.org validator for the
-live page (see the PR description).
+Limitations: this checks the *generated* structured-data blocks only. It
+does not replace the Google Rich Results Test or the Schema.org validator
+for the live page (see the PR description).
 """
 
 import json
@@ -54,20 +64,30 @@ REQUIRED_PAGES = [
     "es/about/index.html",
 ]
 
+# Homepages (must carry the Organization block) and About pages (must
+# carry the ProfilePage block).
+HOME_PAGES = ("index.html", "es/index.html")
+ABOUT_PAGES = ("about/index.html", "es/about/index.html")
+
 # Keys this test reads from data/identity.yaml.
-SCALAR_KEYS = ("personId", "fullName")
+SCALAR_KEYS = ("personId", "fullName", "description", "descriptionEs")
 # File key -> Person JSON-LD field. (The file spells it "alternateNames";
 # the JSON-LD field is the singular "alternateName".)
 LIST_KEYS = {"alternateNames": "alternateName", "knowsAbout": "knowsAbout"}
 PROFILE_KEYS = (
     "github",
+    "githubSecond",
     "linkedin",
     "orcid",
     "medium",
     "substackAuthorProfile",
 )
 # sameAs is built from these profile fields, in this order.
-SAMEAS_FIELDS = ("github", "linkedin", "orcid", "medium", "substackAuthorProfile")
+SAMEAS_FIELDS = ("github", "githubSecond", "linkedin", "orcid", "medium", "substackAuthorProfile")
+# The Organization block (the site/publication) carries its own narrowed
+# sameAs: the author profiles plus the My AI Journey publication URL.
+# The mailto: contact is not a profile URL and must not appear here.
+ORG_SAMEAS_FIELDS = ("github", "linkedin", "medium", "orcid", "substackPublication")
 # Publication URLs: identity-adjacent, but must never appear in sameAs.
 PUBLICATION_FIELDS = ("substackPublication", "mediumPublication")
 
@@ -127,17 +147,27 @@ def read_identity(path):
     return identity
 
 
-def person_blocks(html):
-    """Return the parsed JSON-LD blocks of @type Person found in the HTML."""
-    persons = []
+def jsonld_blocks(html):
+    """Return every parsed JSON-LD block (dict) found in the HTML."""
+    blocks = []
     for match in SCRIPT_RE.finditer(html):
         try:
             obj = json.loads(match.group(1))
         except json.JSONDecodeError as exc:
             raise ValueError(f"unparsable JSON-LD block: {exc}") from exc
-        if isinstance(obj, dict) and obj.get("@type") == "Person":
-            persons.append(obj)
-    return persons
+        if isinstance(obj, dict):
+            blocks.append(obj)
+    return blocks
+
+
+def person_blocks(html):
+    """Return the parsed JSON-LD blocks of @type Person found in the HTML."""
+    return [b for b in jsonld_blocks(html) if b.get("@type") == "Person"]
+
+
+def blocks_of_type(html, type_name):
+    """Return the parsed JSON-LD blocks of the given @type."""
+    return [b for b in jsonld_blocks(html) if b.get("@type") == type_name]
 
 
 def collect_pages(public_dir):
@@ -175,6 +205,10 @@ def main(argv):
         "knowsAbout": identity["knowsAbout"],
     }
     forbidden = [identity["profiles"][f] for f in PUBLICATION_FIELDS]
+    # The author link every BlogPosting must use, and the mainEntity every
+    # ProfilePage must carry: a reference to the Person entity, not a name.
+    author_link = {"@type": "Person", "@id": identity["personId"]}
+    org_sameas = [identity["profiles"][f] for f in ORG_SAMEAS_FIELDS]
 
     failures = []
     required, posts = collect_pages(public_dir)
@@ -214,6 +248,52 @@ def main(argv):
                 failures.append(
                     f"{label}: Person {field} mismatch: got {got!r}, "
                     f"want {want!r}")
+        # The description follows the page language, not the site default.
+        want_desc = (identity["descriptionEs"] if label.startswith("es/")
+                     else identity["description"])
+        if person.get("description") != want_desc:
+            failures.append(
+                f"{label}: Person description mismatch: got "
+                f"{person.get('description')!r}, want {want_desc!r}")
+        # BlogPosting.author must link to the Person entity by @id.
+        for posting in blocks_of_type(html, "BlogPosting"):
+            if posting.get("author") != author_link:
+                failures.append(
+                    f"{label}: BlogPosting author is not the Person @id "
+                    f"link: got {posting.get('author')!r}, "
+                    f"want {author_link!r}")
+        # ProfilePage appears only on About pages, with the Person as
+        # mainEntity (a reference, not a duplicated entity).
+        profiles = blocks_of_type(html, "ProfilePage")
+        if label in ABOUT_PAGES:
+            if len(profiles) != 1:
+                failures.append(
+                    f"{label}: expected exactly 1 ProfilePage block, "
+                    f"found {len(profiles)}")
+            elif profiles[0].get("mainEntity") != author_link:
+                failures.append(
+                    f"{label}: ProfilePage mainEntity is not the Person "
+                    f"@id link: got {profiles[0].get('mainEntity')!r}, "
+                    f"want {author_link!r}")
+        elif profiles:
+            failures.append(
+                f"{label}: unexpected ProfilePage block on a non-About page")
+        # The Organization block (the site/publication) appears only on
+        # homepages, with the narrowed sameAs: no mailto:, publication URL
+        # allowed here because it describes the site, not the person.
+        orgs = blocks_of_type(html, "Organization")
+        if label in HOME_PAGES:
+            if len(orgs) != 1:
+                failures.append(
+                    f"{label}: expected exactly 1 Organization block, "
+                    f"found {len(orgs)}")
+            elif orgs[0].get("sameAs") != org_sameas:
+                failures.append(
+                    f"{label}: Organization sameAs mismatch: got "
+                    f"{orgs[0].get('sameAs')!r}, want {org_sameas!r}")
+        elif orgs:
+            failures.append(
+                f"{label}: unexpected Organization block on a non-home page")
         if reference is None:
             reference = {f: person.get(f) for f in expected}
         else:
@@ -238,7 +318,9 @@ def main(argv):
     print(f"PASS: Person @id {expected['@id']} identical on {len(pages)} "
           f"pages ({len(required)} required + {len(posts)} posts); "
           f"sameAs has {len(expected['sameAs'])} author profiles, "
-          f"no publication URLs.")
+          f"no publication URLs; descriptions localized per language; "
+          f"BlogPosting authors link to #person; ProfilePage on About "
+          f"pages only; Organization sameAs narrowed (no mailto:).")
     return 0
 
 

@@ -50,6 +50,23 @@ enableEmoji = true
     name = "substack"
     url = "https://edjaramilloaijourney.substack.com"
 
+  # Phase III-A item A5: the homepage Organization block (PaperMod schema)
+  # describes the site/publication "My AI Journey". Its sameAs holds
+  # profile/page URLs only: the mailto: contact was removed (a contact
+  # method, not an identity profile). The Substack publication URL stays,
+  # because for the Organization it is the site's own page. Person sameAs
+  # is unaffected — it is a separate block generated from
+  # data/identity.yaml. Without this list PaperMod builds sameAs from the
+  # socialIcons above, mailto: included.
+  [params.schema]
+    sameAs = [
+      "https://github.com/Ejaramillo1",
+      "https://www.linkedin.com/in/jose-eduardo-jaramillo",
+      "https://medium.com/@ejaramillobarrera",
+      "https://orcid.org/0009-0002-0889-4830",
+      "https://edjaramilloaijourney.substack.com",
+    ]
+
   [params.footer]
     text = "Economist by training. Agent researcher by craft."
 

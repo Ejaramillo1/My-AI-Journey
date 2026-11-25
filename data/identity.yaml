@@ -9,9 +9,14 @@
 # Name rule (owner decision, 24 Nov 2026):
 #   - Visible UI (hero, About headings, meta descriptions) uses displayName.
 #   - Formal contexts (structured data, authorship bylines) use fullName.
-#   - alternateNames covers the other two forms people search for.
+#   - alternateNames covers the other forms people search for
+#     ("Eduardo Jaramillo Barrera", "Ed Jaramillo", "Eduardo Jaramillo").
 # Primary GitHub identity is Ejaramillo1. Ed-Jaramillo is a second account
-# used only for the Loom fork; it is not listed here as a primary profile.
+# of the same person, used only for the Loom fork; it is listed in
+# Person.sameAs as githubSecond (verified 25 Nov 2026: the account's
+# profile name is "Ed Jaramillo", its loom repo is a fork of
+# teradata-labs/loom, and its branches carry Eduardo's full name, e.g.
+# joseeduardo-barrera-teradata-phoenix-phase-5).
 
 fullName: José Eduardo Jaramillo Barrera
 givenName: José Eduardo
@@ -20,6 +25,7 @@ displayName: Eduardo Jaramillo
 alternateNames:
   - Eduardo Jaramillo Barrera
   - Ed Jaramillo
+  - Eduardo Jaramillo
 
 jobTitle: Research Engineer, Agentic Platforms
 organization:
@@ -49,6 +55,9 @@ orcid:
 
 profiles:
   github: https://github.com/Ejaramillo1
+  # Second GitHub account of the same person (see header comment). Listed
+  # in Person.sameAs directly after the primary account.
+  githubSecond: https://github.com/Ed-Jaramillo
   linkedin: https://www.linkedin.com/in/jose-eduardo-jaramillo
   orcid: https://orcid.org/0009-0002-0889-4830
   medium: https://medium.com/@ejaramillobarrera
