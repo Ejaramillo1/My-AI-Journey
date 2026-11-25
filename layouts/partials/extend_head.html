@@ -27,7 +27,7 @@
   "alumniOf" (dict "@type" "EducationalOrganization" "name" $alumni.institution "alternateName" $alumni.institutionShort "url" $alumni.institutionUrl)
   "description" .description
   "knowsAbout" .knowsAbout
-  "sameAs" (slice .profiles.github .profiles.linkedin .profiles.orcid .profiles.medium .profiles.substack)
+  "sameAs" (slice .profiles.github .profiles.linkedin .profiles.orcid .profiles.medium .profiles.substackAuthorProfile)
 }}
 <script type="application/ld+json">
 {{ $person | jsonify | safeJS }}

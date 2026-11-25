@@ -52,7 +52,14 @@ profiles:
   linkedin: https://www.linkedin.com/in/jose-eduardo-jaramillo
   orcid: https://orcid.org/0009-0002-0889-4830
   medium: https://medium.com/@ejaramillobarrera
-  substack: https://edjaramilloaijourney.substack.com
+  # Teradata Labs is a publication Eduardo writes for, not a personal
+  # profile. It must never appear in Person.sameAs.
+  mediumPublication: https://medium.com/teradata-labs
+  # Substack is two different things: the personal author profile (identity,
+  # belongs in Person.sameAs) and the My AI Journey publication he authors
+  # (visible link only, never in sameAs).
+  substackAuthorProfile: https://substack.com/@jeduardojaramillo
+  substackPublication: https://edjaramilloaijourney.substack.com
   email: mailto:ejaramillobarrera@gmail.com
 
 tagline: "I test whether AI agents actually work: memory, evaluation, observability."
