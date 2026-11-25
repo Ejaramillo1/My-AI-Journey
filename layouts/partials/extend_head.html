@@ -6,25 +6,30 @@
 <link rel="icon" type="image/png" href="{{ "favicon.png" | relURL }}">
 <link rel="apple-touch-icon" href="{{ "apple-touch-icon.png" | relURL }}">
 
-{{/* SEO: Person structured data — author entity for José Eduardo Jaramillo.
-     Complements PaperMod's built-in Organization (home) and BlogPosting (posts)
-     schemas, which pick up the author name from params/frontmatter. */}}
+{{/* SEO: Person structured data, generated from data/identity.yaml, the
+     single source of truth. Visible UI uses displayName; structured data
+     uses the full formal name. Complements PaperMod's built-in Organization
+     (home) and BlogPosting (posts) schemas, which pick up the author name
+     from params/frontmatter. */}}
+{{ with .Site.Data.identity }}
+{{ $alumni := index .education 0 }}
+{{ $person := dict
+  "@context" "https://schema.org"
+  "@type" "Person"
+  "@id" .personId
+  "name" .fullName
+  "givenName" .givenName
+  "familyName" .familyName
+  "alternateName" .alternateNames
+  "url" .siteUrl
+  "jobTitle" .jobTitle
+  "worksFor" (dict "@type" "Organization" "name" .organization.name "url" .organization.url "department" (dict "@type" "Organization" "name" .organization.department))
+  "alumniOf" (dict "@type" "EducationalOrganization" "name" $alumni.institution "alternateName" $alumni.institutionShort "url" $alumni.institutionUrl)
+  "description" .description
+  "knowsAbout" .knowsAbout
+  "sameAs" (slice .profiles.github .profiles.linkedin .profiles.orcid .profiles.medium .profiles.substack)
+}}
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "@id": "https://ejaramillo1.github.io/My-AI-Journey/#person",
-  "name": "José Eduardo Jaramillo",
-  "alternateName": "Ed Jaramillo",
-  "url": "https://ejaramillo1.github.io/My-AI-Journey/",
-  "jobTitle": "Research Engineer, Agentic Platforms",
-  "worksFor": { "@type": "Organization", "name": "Teradata", "url": "https://www.teradata.com" },
-  "alumniOf": { "@type": "EducationalOrganization", "name": "Universidad Autónoma de Baja California" },
-  "knowsAbout": ["Agent Memory", "LLM Evaluation", "Agent Observability", "Agentic AI", "Multi-Agent Systems", "Game Theory", "Econometrics"],
-  "sameAs": [
-    "https://github.com/Ejaramillo1",
-    "https://www.linkedin.com/in/jose-eduardo-jaramillo",
-    "https://ejaramillo1.github.io/My-AI-Journey/"
-  ]
-}
+{{ $person | jsonify | safeJS }}
 </script>
+{{ end }}

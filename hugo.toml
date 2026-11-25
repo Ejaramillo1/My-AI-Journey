@@ -1,5 +1,10 @@
 # Hugo Site Configuration
 # Theme: PaperMod (git submodule)
+#
+# Identity: the single source of truth for name, role, profiles, and
+# structured data lives in data/identity.yaml. params.author below mirrors
+# its displayName; the Person JSON-LD in layouts/partials/extend_head.html
+# is generated from that file. Change identity data there, not here.
 baseURL = "https://ejaramillo1.github.io/My-AI-Journey/"
 languageCode = "en-us"
 title = "My AI Journey"
@@ -14,6 +19,7 @@ enableEmoji = true
   home = ["HTML", "RSS", "ROBOTS"]
 
 [params]
+  # Display name — mirrors displayName in data/identity.yaml.
   author = "Eduardo Jaramillo"
   description = "Eduardo Jaramillo, Research Engineer (Agentic Platforms) at Teradata — agent memory, evaluation, observability. Building AI agents, learning in public."
   keywords = ["Eduardo Jaramillo", "Agent Memory", "AI Agents", "LLM Evaluation", "Agent Observability", "Agentic AI", "Loom", "Teradata", "Economist"]
@@ -34,6 +40,15 @@ enableEmoji = true
   [[params.socialIcons]]
     name = "email"
     url = "mailto:ejaramillobarrera@gmail.com"
+  [[params.socialIcons]]
+    name = "medium"
+    url = "https://medium.com/@ejaramillobarrera"
+  [[params.socialIcons]]
+    name = "orcid"
+    url = "https://orcid.org/0009-0002-0889-4830"
+  [[params.socialIcons]]
+    name = "substack"
+    url = "https://edjaramilloaijourney.substack.com"
 
   [params.footer]
     text = "Economist by training. Agent researcher by craft."

@@ -4,7 +4,7 @@ date: 2026-11-08
 draft: false
 tags: ["AI Agents", "Hugo", "GitHub Pages", "Muse"]
 categories: ["AI & Automation"]
-author: "José Eduardo Jaramillo"
+author: "José Eduardo Jaramillo Barrera"
 description: "My AI assistant redesigned, deployed, and debugged this blog — Hugo on GitHub Pages, a cyberpunk v5 theme, and one missing URL prefix that broke four things at once."
 cover:
   image: "images/hero-bg.jpg"
