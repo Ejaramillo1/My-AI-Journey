@@ -1,10 +1,22 @@
 """B3 integrated test: serve the Hugo build and assert the homepage.
 
 Portable: no machine-specific paths, no fixed port, no pinned browser
-binary. The server directory and the port are temporary; the browser is
-Playwright's default Chromium. Expected values are read from
-data/identity.yaml (the single source of truth), so the test checks that
-the rendered page matches the data, not a hardcoded copy of it.
+binary. Expected values are read from data/identity.yaml (the single
+source of truth) with yaml.safe_load (PyYAML 6.0.2, pinned), so the test
+checks that the rendered page matches the data, not a hardcoded copy.
+
+The test server runs in-process on loopback only (127.0.0.1, port 0:
+the OS assigns a free port and the server keeps the bound socket, so
+there is no port race and the build is never exposed on the network).
+The served tree is a copy of public/ inside a TemporaryDirectory, so
+the temporary directory is removed even if setup fails, and no symlink
+is used (the test runs on Linux, macOS and Windows without admin
+rights or Developer Mode).
+
+The build is rebuilt with Hugo when a hugo binary is available
+(HUGO_BIN, or hugo on PATH); otherwise public/ must already exist and
+be newer than every source file, or the test fails loudly instead of
+testing a stale build.
 
 Checks, per theme (dark/light) x viewport (1920/1440/390/320) x language
 (EN/ES): H1, eyebrow role, tagline, bio, chips, the 3 publications
@@ -15,30 +27,39 @@ horizontal overflow (320px reflow included). JSON-LD invariants are
 checked on every homepage load: Person (name, @id, jobTitle, knowsAbout,
 6 sameAs in order) and Organization (sameAs is the Substack publication
 only, no personal profiles). Post routes are checked separately:
-  /posts/ and /es/posts/ return 200 with 6 / 5 entries, and the
-homepage carries no post list.
+  /posts/ and /es/posts/ return 200 with 6 / 5 entries, the list links
+match the candidate content tree, and every post on the live site
+(main branch, fetched from the public GitHub API) is still listed and
+its detail page loads and renders as a post. If the GitHub API is
+unreachable those base checks are recorded as skipped, not failed.
+The homepage carries no post list.
 
 Usage, from the repo root (work-d4):
     python3 scripts/test-b3.py
-Requires Playwright (pip install playwright; playwright install
-chromium). If Playwright is missing the script prints setup steps and
-exits 2. The site must already be built (public/ must exist); run
-`hugo --gc --minify` first. Screenshots and measurements go to a
-temporary directory, printed at the end; set B3_TEST_OUT to keep them
-in a fixed place. Exit code 0 only if every check passes; 1 otherwise.
-The server is stopped and the temporary serve directory removed even
-on failure.
+Requires Playwright and PyYAML. Set them up once in a repo-local venv,
+then rerun:
+    python3 -m venv .venv
+    .venv/bin/pip install "playwright" "pyyaml==6.0.2"
+    .venv/bin/playwright install chromium
+    .venv/bin/python scripts/test-b3.py
+Set HUGO_BIN to a hugo binary to rebuild the site before testing;
+otherwise run `hugo --gc --minify` first. Screenshots and measurements
+go to a temporary directory, printed at the end; set B3_TEST_OUT to
+keep them in a fixed place. Exit code 0 only if every check passes;
+1 otherwise; 2 for a setup failure (missing dependency, missing or
+stale build, server did not start).
 """
+import functools
 import json
 import os
 import re
 import shutil
-import socket
 import subprocess
 import sys
 import tempfile
-import time
+import threading
 import urllib.request
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 WORK = Path(__file__).resolve().parents[1]
@@ -66,80 +87,55 @@ def fail(msg):
 
 
 # ---------------------------------------------------------------- identity
-def parse_identity(path):
-    """Minimal YAML reader for the flat identity.yaml structure.
+try:
+    import yaml
+except ImportError:
+    print("PyYAML is not installed for this Python.", file=sys.stderr)
+    print("Set it up once, then rerun:", file=sys.stderr)
+    print('  python3 -m venv .venv', file=sys.stderr)
+    print('  .venv/bin/pip install "playwright" "pyyaml==6.0.2"', file=sys.stderr)
+    print("  .venv/bin/playwright install chromium", file=sys.stderr)
+    print("  .venv/bin/python scripts/test-b3.py", file=sys.stderr)
+    sys.exit(2)
 
-    Only the fields this test asserts are parsed; the file is a flat
-    mapping plus a few simple lists, so regexes on lines are enough.
-    Raises ValueError if any expected field is missing.
+
+def parse_identity(path):
+    """Read identity.yaml with yaml.safe_load and extract the fields
+    this test asserts. Raises ValueError if any expected field is
+    missing, so a schema change fails loudly instead of silently
+    passing with a stale expectation.
     """
-    text = path.read_text(encoding="utf-8")
-    lines = text.splitlines()
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"identity.yaml: cannot read: {exc}")
+    except yaml.YAMLError as exc:
+        raise ValueError(f"identity.yaml: invalid YAML: {exc}")
+    if not isinstance(data, dict):
+        raise ValueError("identity.yaml: expected a top-level mapping")
 
     def field(name):
-        for ln in lines:
-            m = re.match(rf"^{name}: \"(.*)\"$", ln)
-            if m:
-                return m.group(1)
-            m = re.match(rf"^{name}: (.+)$", ln)
-            if m:
-                return m.group(1).strip()
-        raise ValueError(f"identity.yaml: missing field {name}")
+        v = data.get(name)
+        if v is None or (isinstance(v, str) and not v.strip()):
+            raise ValueError(f"identity.yaml: missing field {name}")
+        return str(v)
 
     def str_list(name):
-        out, in_block = [], False
-        for ln in lines:
-            if re.match(rf"^{name}:$", ln):
-                in_block = True
-                continue
-            if in_block:
-                m = re.match(r"^  - (.+)$", ln)
-                if m:
-                    out.append(m.group(1).strip())
-                    continue
-                if ln.strip() and not ln.startswith(" "):
-                    break
-        if not out:
+        v = data.get(name)
+        if not isinstance(v, list) or not v or not all(isinstance(x, str) for x in v):
             raise ValueError(f"identity.yaml: missing list {name}")
-        return out
+        return list(v)
 
-    pubs, cur = [], None
-    in_pubs = False
-    for ln in lines:
-        if ln.startswith("publications:"):
-            in_pubs = True
-            continue
-        if in_pubs:
-            m = re.match(r'^  - title: "(.*)"$', ln)
-            if m:
-                cur = {"title": m.group(1)}
-                pubs.append(cur)
-                continue
-            m = re.match(r"^    url: (\S+)$", ln)
-            if m and cur is not None:
-                cur["url"] = m.group(1)
-                continue
-            if ln.strip() and not ln.startswith(" "):
-                break
-    if len(pubs) != 3 or any("url" not in p for p in pubs):
-        raise ValueError("identity.yaml: expected 3 publications with urls")
-
-    profiles = {}
-    in_profiles = False
-    for ln in lines:
-        if ln.startswith("profiles:"):
-            in_profiles = True
-            continue
-        if in_profiles:
-            m = re.match(r"^  (github|githubSecond|linkedin|orcid|medium|substackAuthorProfile|substackPublication): (\S+)$", ln)
-            if m:
-                profiles[m.group(1)] = m.group(2)
-                continue
-            if ln.strip() and not ln.startswith(" "):
-                break
+    pubs = data.get("publications")
+    if (not isinstance(pubs, list) or len(pubs) != 3
+            or any(not isinstance(p, dict) or not p.get("title") or not p.get("url")
+                   for p in pubs)):
+        raise ValueError("identity.yaml: expected 3 publications with titles and urls")
+    profiles = data.get("profiles")
     need = ["github", "githubSecond", "linkedin", "orcid", "medium",
             "substackAuthorProfile", "substackPublication"]
-    if any(k not in profiles for k in need):
+    if (not isinstance(profiles, dict)
+            or any(not profiles.get(k) for k in need)):
         raise ValueError("identity.yaml: missing profile urls")
 
     return {
@@ -157,7 +153,7 @@ def parse_identity(path):
         "siteUrl": field("siteUrl"),
         "knowsAbout": str_list("knowsAbout"),
         "chipsEs": str_list("chipsEs"),
-        "publications": pubs,
+        "publications": [{"title": p["title"], "url": p["url"]} for p in pubs],
         "profiles": profiles,
         "sameAs": [profiles[k] for k in
                    ["github", "githubSecond", "linkedin", "orcid", "medium",
@@ -170,26 +166,25 @@ def parse_identity(path):
 
 try:
     ID = parse_identity(IDENTITY)
-except (OSError, ValueError) as exc:
+except ValueError as exc:
     fail(str(exc))
-
-if not (PUBLIC / "index.html").is_file() or not (PUBLIC / "es" / "index.html").is_file():
-    fail("public/ build missing; run `hugo --gc --minify` in work-d4 first")
 
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:
     print("Playwright is not installed for this Python.", file=sys.stderr)
     print("Set it up once, then rerun:", file=sys.stderr)
-    print("  python3 -m venv ~/workspace/my-ai-journey-central-identity/work-side-space/pw-venv", file=sys.stderr)
-    print("  ~/workspace/my-ai-journey-central-identity/work-side-space/pw-venv/bin/pip install playwright", file=sys.stderr)
-    print("  ~/workspace/my-ai-journey-central-identity/work-side-space/pw-venv/bin/playwright install chromium", file=sys.stderr)
+    print("  python3 -m venv .venv", file=sys.stderr)
+    print('  .venv/bin/pip install "playwright" "pyyaml==6.0.2"', file=sys.stderr)
+    print("  .venv/bin/playwright install chromium", file=sys.stderr)
+    print("  .venv/bin/python scripts/test-b3.py", file=sys.stderr)
     sys.exit(2)
 
 
 # ---------------------------------------------------------------- checks
 passed = 0
 failures = []
+skipped = []
 
 
 def check(label, cond, detail=""):
@@ -198,6 +193,10 @@ def check(label, cond, detail=""):
         passed += 1
     else:
         failures.append(f"{label}: {detail}" if detail else label)
+
+
+def skip(label, reason):
+    skipped.append(f"{label}: {reason}")
 
 
 def norm_rgb(s):
@@ -353,7 +352,30 @@ def check_homepage(pg, theme, width, lang, out_dir, results):
               f"got {orgs[0].get('sameAs')!r}")
 
 
-def check_posts(pg, lang):
+def fetch_base_slugs():
+    """Slugs of the posts on the live site (main branch) via the public
+    GitHub API. Returns {lang: [slugs]} or None if the fetch fails
+    (network, rate limit, unexpected response). Callers record the
+    base checks as skipped, not failed, so a transient network failure
+    is never reported as a layout failure.
+    """
+    out = {}
+    for lang in ("en", "es"):
+        url = ("https://api.github.com/repos/Ejaramillo1/My-AI-Journey/"
+               f"contents/content/{lang}/posts?ref=main")
+        req = urllib.request.Request(url, headers={"User-Agent": "b3-test"})
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                entries = json.loads(r.read().decode("utf-8"))
+        except (OSError, ValueError):
+            return None
+        if not isinstance(entries, list):
+            return None
+        out[lang] = sorted(e["name"] for e in entries if e.get("type") == "dir")
+    return out
+
+
+def check_posts(pg, lang, base_slugs):
     path = "/My-AI-Journey/posts/" if lang == "en" else "/My-AI-Journey/es/posts/"
     resp = pg.goto(f"{BASE}{path}", wait_until="networkidle")
     check(f"posts-{lang} http", resp is not None and resp.status == 200,
@@ -372,11 +394,95 @@ def check_posts(pg, lang):
     check(f"posts-{lang} links", sorted(hrefs) == want,
           f"got {sorted(hrefs)!r}, want {want!r}")
 
+    # Base preservation: every post on the live site (main) must still
+    # be listed, and its detail page must load and render as a post.
+    # This catches a deleted or renamed slug, which the candidate-tree
+    # checks above cannot see because they only check what exists.
+    if base_slugs is None:
+        skip(f"base-{lang} routes",
+             "GitHub API unreachable; base inventory not fetched")
+        return
+    listed = sorted(u[len(prefix):-1] for u in hrefs if u.startswith(prefix))
+    missing = sorted(set(base_slugs) - set(listed))
+    check(f"base-{lang} all listed", not missing, f"missing: {missing}")
+    for slug in base_slugs:
+        sub = "es/" if lang == "es" else ""
+        url = f"{BASE}/My-AI-Journey/{sub}posts/{slug}/"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "b3-test"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                body = r.read()
+                final = r.geturl()
+        except OSError as exc:
+            check(f"base-{lang} {slug} loads", False, str(exc))
+            continue
+        check(f"base-{lang} {slug} no redirect", final == url,
+              f"redirected to {final}")
+        # The minified detail page writes the article tag unquoted
+        # (<article class=post-single>); the marker is the class name.
+        check(f"base-{lang} {slug} renders post", b"post-single" in body,
+              "detail page has no post-single article")
 
-def free_port():
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
+
+class QuietHandler(SimpleHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+
+def start_server(serve_dir):
+    """In-process HTTP server on loopback only, port 0. The OS assigns
+    a free port and the server keeps the bound socket, so there is no
+    race between picking a port and binding it, and the build is never
+    exposed on the network. The socket is bound in the constructor, so
+    the server answers as soon as this returns.
+    """
+    handler = functools.partial(QuietHandler, directory=str(serve_dir))
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv
+
+
+def source_files():
+    for name in ("content", "layouts", "data", "assets", "static", "themes"):
+        d = WORK / name
+        if d.is_dir():
+            for p in d.rglob("*"):
+                if p.is_file() and not any(part.startswith(".") for part in p.parts):
+                    yield p
+    p = WORK / "hugo.toml"
+    if p.is_file():
+        yield p
+
+
+def ensure_build():
+    """Rebuild the site with Hugo when a binary is available
+    (HUGO_BIN, or hugo on PATH); otherwise verify public/ exists and
+    is newer than every source file, and fail loudly instead of
+    testing a stale build.
+    """
+    hugo = os.environ.get("HUGO_BIN") or shutil.which("hugo")
+    if hugo:
+        try:
+            r = subprocess.run([hugo, "--gc", "--minify"], cwd=WORK,
+                               capture_output=True, text=True)
+        except OSError as exc:
+            fail(f"HUGO_BIN={hugo} cannot run: {exc}")
+        if r.returncode != 0:
+            fail(f"hugo build failed: {r.stderr.strip()[-500:]}")
+        return
+    if not (PUBLIC / "index.html").is_file():
+        fail("public/ build missing and no hugo found; run "
+             "`hugo --gc --minify` in the repo root, or set HUGO_BIN "
+             "to a hugo binary")
+    newest_public = max((p.stat().st_mtime for p in PUBLIC.rglob("*")
+                         if p.is_file()), default=0)
+    stale = [str(p) for p in source_files()
+             if p.stat().st_mtime > newest_public]
+    if stale:
+        fail("public/ is stale (source files newer than the build): "
+             + ", ".join(stale[:5])
+             + "; run `hugo --gc --minify` in the repo root, or set "
+             "HUGO_BIN to a hugo binary")
 
 
 def main():
@@ -384,61 +490,63 @@ def main():
     out_dir = Path(out_env) if out_env else Path(tempfile.mkdtemp(prefix="b3-test-"))
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    serve_dir = Path(tempfile.mkdtemp(prefix="b3serve-"))
-    link = serve_dir / "My-AI-Journey"
-    link.symlink_to(PUBLIC, target_is_directory=True)
-    port = free_port()
-    srv = subprocess.Popen(
-        [sys.executable, "-m", "http.server", str(port),
-         "--directory", str(serve_dir)],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    global BASE
-    BASE = f"http://127.0.0.1:{port}"
-    try:
-        for _ in range(50):
-            try:
-                with urllib.request.urlopen(f"{BASE}/My-AI-Journey/", timeout=2) as r:
-                    if r.status == 200:
-                        break
-            except OSError:
-                time.sleep(0.2)
-        else:
-            fail("test server did not answer")
+    ensure_build()
+    if not (PUBLIC / "index.html").is_file() or not (PUBLIC / "es" / "index.html").is_file():
+        fail("public/ build missing the EN or ES homepage after the build step")
 
-        results = {}
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            for theme in ("dark", "light"):
-                for width in (1920, 1440, 390, 320):
-                    for lang in ("en", "es"):
-                        pg = browser.new_page(viewport={"width": width, "height": 1000})
-                        try:
-                            check_homepage(pg, theme, width, lang, out_dir, results)
-                        finally:
-                            pg.close()
-            pg = browser.new_page(viewport={"width": 1440, "height": 1000})
-            try:
-                check_posts(pg, "en")
-                check_posts(pg, "es")
-            finally:
-                pg.close()
-            browser.close()
-        (out_dir / "measurements-b3.json").write_text(
-            json.dumps(results, indent=1), encoding="utf-8")
-    finally:
-        srv.terminate()
+    base = fetch_base_slugs()
+
+    # TemporaryDirectory is the lifecycle guard: the served copy of the
+    # build is removed even if the copy, the server start, or any check
+    # fails. No symlink is used, so no platform permission is needed.
+    with tempfile.TemporaryDirectory(prefix="b3serve-") as serve_dir:
+        root = Path(serve_dir) / "My-AI-Journey"
+        shutil.copytree(PUBLIC, root)
+        srv = start_server(serve_dir)
+        global BASE
+        BASE = f"http://127.0.0.1:{srv.server_address[1]}"
         try:
-            srv.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            srv.kill()
-        shutil.rmtree(serve_dir, ignore_errors=True)
+            # One probe so a server problem fails fast with a clear
+            # message instead of surfacing as a page-load failure.
+            with urllib.request.urlopen(f"{BASE}/My-AI-Journey/", timeout=5) as r:
+                if r.status != 200:
+                    fail(f"test server answered {r.status}, not 200")
+
+            results = {}
+            with sync_playwright() as p:
+                browser = p.chromium.launch()
+                for theme in ("dark", "light"):
+                    for width in (1920, 1440, 390, 320):
+                        for lang in ("en", "es"):
+                            pg = browser.new_page(viewport={"width": width, "height": 1000})
+                            try:
+                                check_homepage(pg, theme, width, lang, out_dir, results)
+                            finally:
+                                pg.close()
+                pg = browser.new_page(viewport={"width": 1440, "height": 1000})
+                try:
+                    check_posts(pg, "en", base["en"] if base else None)
+                    check_posts(pg, "es", base["es"] if base else None)
+                finally:
+                    pg.close()
+                browser.close()
+            (out_dir / "measurements-b3.json").write_text(
+                json.dumps(results, indent=1), encoding="utf-8")
+        finally:
+            srv.shutdown()
+            srv.server_close()
 
     print(f"checks passed: {passed}")
     print(f"checks failed: {len(failures)}")
+    print(f"checks skipped: {len(skipped)}")
     if failures:
         print("FAILURES:")
         for f in failures:
             print(f"  - {f}")
+    if skipped:
+        print("SKIPPED:")
+        for s in skipped:
+            print(f"  - {s}")
     print(f"evidence: {out_dir}")
     return 1 if failures else 0
 
