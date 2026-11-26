@@ -5,18 +5,52 @@ binary. Expected values are read from data/identity.yaml (the single
 source of truth) with yaml.safe_load (PyYAML 6.0.2, pinned), so the test
 checks that the rendered page matches the data, not a hardcoded copy.
 
+Two modes. Local mode is the default: it reports partial results
+explicitly when a check cannot run (skips are listed, not hidden), and
+it may fall back to an existing public/ build when no Hugo binary is
+available, verified only by file timestamps. That timestamp fallback
+is a heuristic, not release evidence. Strict mode (--strict, or
+B3_STRICT=1) is the release gate: exit 0 only if every check passes
+AND zero checks are skipped; Hugo is required (no timestamp fallback);
+and a missing historical baseline fails loudly instead of skipping.
+Use strict mode for a release decision; use local mode for day to day
+development. Exit codes: 0 pass, 1 a check failed (or, in strict
+mode, a check was skipped), 2 a setup failure (missing dependency,
+missing Hugo in strict mode, missing baseline in strict mode, missing
+or stale build, server did not start).
+
 The test server runs in-process on loopback only (127.0.0.1, port 0:
 the OS assigns a free port and the server keeps the bound socket, so
 there is no port race and the build is never exposed on the network).
-The served tree is a copy of public/ inside a TemporaryDirectory, so
+The served tree is a copy of the build inside a TemporaryDirectory, so
 the temporary directory is removed even if setup fails, and no symlink
-is used (the test runs on Linux, macOS and Windows without admin
-rights or Developer Mode).
+is used (the test runs on Linux and macOS without admin rights or
+Developer Mode; Windows support is not independently tested, and the
+setup examples below use POSIX venv paths).
 
-The build is rebuilt with Hugo when a hugo binary is available
-(HUGO_BIN, or hugo on PATH); otherwise public/ must already exist and
-be newer than every source file, or the test fails loudly instead of
-testing a stale build.
+The build is fresh. When a Hugo binary is available (HUGO_BIN, or
+hugo on PATH) the site is built into a fresh temporary destination,
+never into the existing public/ directory, so a stale file from an
+earlier build cannot survive and make a deleted route look healthy.
+The test then serves that exact fresh output. When no Hugo binary is
+available, local mode verifies public/ exists and is newer than every
+source file and serves that copy; strict mode fails loudly instead,
+because a timestamp check is not release evidence.
+
+Historical routes are checked against the pinned PR base, not the
+mutable main branch. The versioned inventory below (BASE_INVENTORY)
+lists every historical post URL and the title its detail page must
+carry, generated from the pinned base commit. The test also fetches
+the slug list from the GitHub API at that exact base SHA and uses the
+fetched list when it is available; when the fetch fails it falls back
+to the embedded inventory (so the test works offline when the
+inventory is available). When neither source can provide the
+inventory, strict mode fails loudly and local mode records the base
+checks as skipped. Redirects are NOT permitted for historical post
+URLs: the URL must return 200 directly and render the post carrying
+its expected title. A redirect means the URL moved, which is a
+preservation failure, so the test asserts the final URL equals the
+requested URL and the expected title appears in the page.
 
 Checks, per theme (dark/light) x viewport (1920/1440/390/320) x language
 (EN/ES): H1, eyebrow role, tagline, bio, chips, the 3 publications
@@ -28,14 +62,14 @@ checked on every homepage load: Person (name, @id, jobTitle, knowsAbout,
 6 sameAs in order) and Organization (sameAs is the Substack publication
 only, no personal profiles). Post routes are checked separately:
   /posts/ and /es/posts/ return 200 with 6 / 5 entries, the list links
-match the candidate content tree, and every post on the live site
-(main branch, fetched from the public GitHub API) is still listed and
-its detail page loads and renders as a post. If the GitHub API is
-unreachable those base checks are recorded as skipped, not failed.
+match the candidate content tree, and every historical post URL from
+the pinned base still resolves (200, no redirect) and renders the post
+carrying its expected title.
 The homepage carries no post list.
 
 Usage, from the repo root (work-d4):
     python3 scripts/test-b3.py
+    python3 scripts/test-b3.py --strict
 Requires Playwright and PyYAML. Set them up once in a repo-local venv,
 then rerun:
     python3 -m venv .venv
@@ -45,11 +79,13 @@ then rerun:
 Set HUGO_BIN to a hugo binary to rebuild the site before testing;
 otherwise run `hugo --gc --minify` first. Screenshots and measurements
 go to a temporary directory, printed at the end; set B3_TEST_OUT to
-keep them in a fixed place. Exit code 0 only if every check passes;
-1 otherwise; 2 for a setup failure (missing dependency, missing or
-stale build, server did not start).
+keep them in a fixed place. Test hooks (not for normal use):
+B3_GITHUB_API_BASE overrides the GitHub API base URL, and
+B3_NO_EMBEDDED_BASE=1 disables the embedded baseline fallback, so an
+offline strict run can be simulated.
 """
 import functools
+import html
 import json
 import os
 import re
@@ -65,6 +101,47 @@ from pathlib import Path
 WORK = Path(__file__).resolve().parents[1]
 IDENTITY = WORK / "data" / "identity.yaml"
 PUBLIC = WORK / "public"
+
+# Pinned PR base for the historical route inventory. The inventory
+# below was generated from this exact commit, so it does not move when
+# main moves. The titles are verbatim from the post frontmatter at
+# that commit; they are data, not prose, and must match exactly for
+# the content-identity check.
+BASE_SHA = "752423511a272ecd1c488fe1f97957c69604a39e"
+BASE_INVENTORY = {
+    "en": [
+        ("architecture-layers",
+         "The Architecture You Need to Understand Before You Touch a Terminal"),
+        ("deepseek-vs-openai",
+         "I Burned $20 in OpenAI Credits in 2 Hours — and Found a Better Way"),
+        ("how-muse-revamped-my-blog",
+         "How Muse Revamped My Blog While I Was Cooking Burgers for Sunday NFL Games"),
+        ("nemoclaw-20-installs",
+         "I Installed NemoClaw 20 Times and Here's What I Learned"),
+        ("non-engineer-guide",
+         "The Non-Engineer's Guide to Running an AI Agent"),
+        ("phone-to-blog-meta",
+         "How I Launched a Bilingual Blog From My Phone at 2 AM Using an AI Agent"),
+    ],
+    "es": [
+        ("architecture-layers",
+         "La Arquitectura Que Necesitas Entender Antes de Tocar una Terminal"),
+        ("deepseek-vs-openai",
+         "Quemé $20 en Créditos de OpenAI en 2 Horas — y Encontré Algo Mejor"),
+        ("nemoclaw-20-installs",
+         "Instalé NemoClaw 20 Veces y Esto Es Lo Que Aprendí"),
+        ("non-engineer-guide",
+         "La Guía del No-Ingeniero para Correr un Agente de IA"),
+        ("phone-to-blog-meta",
+         "Cómo Lancé un Blog Bilingüe Desde Mi Celular a las 2 AM Usando un Agente de IA"),
+    ],
+}
+
+# Modes and test hooks. --strict (or B3_STRICT=1) is the release gate.
+STRICT = "--strict" in sys.argv or os.environ.get("B3_STRICT") == "1"
+GITHUB_API_BASE = os.environ.get("B3_GITHUB_API_BASE",
+                                 "https://api.github.com").rstrip("/")
+NO_EMBEDDED_BASE = os.environ.get("B3_NO_EMBEDDED_BASE") == "1"
 
 # Computed body background on list pages (the homepage is one).
 # PaperMod themes/PaperMod/assets/css/core/theme-vars.css:
@@ -352,30 +429,62 @@ def check_homepage(pg, theme, width, lang, out_dir, results):
               f"got {orgs[0].get('sameAs')!r}")
 
 
-def fetch_base_slugs():
-    """Slugs of the posts on the live site (main branch) via the public
-    GitHub API. Returns {lang: [slugs]} or None if the fetch fails
-    (network, rate limit, unexpected response). Callers record the
-    base checks as skipped, not failed, so a transient network failure
-    is never reported as a layout failure.
+def fetch_base_inventory():
+    """Historical post inventory from the PINNED base commit.
+
+    Returns ({lang: [(slug, title), ...]}, source) where source is
+    "api" when the slug list came from the GitHub API at ref=BASE_SHA,
+    or "embedded" when the API was unreachable and the embedded
+    versioned inventory was used. The titles always come from the
+    embedded inventory (verbatim frontmatter at the pinned base).
+    When neither source can provide the inventory, strict mode fails
+    loudly (the release gate cannot run without a baseline) and local
+    mode returns (None, None) so the caller records the base checks
+    as skipped, explicitly, instead of passing silently.
     """
-    out = {}
+    embedded = {lang: dict(pairs) for lang, pairs in BASE_INVENTORY.items()}
+    fetched = {}
+    api_ok = True
     for lang in ("en", "es"):
-        url = ("https://api.github.com/repos/Ejaramillo1/My-AI-Journey/"
-               f"contents/content/{lang}/posts?ref=main")
+        url = (f"{GITHUB_API_BASE}/repos/Ejaramillo1/My-AI-Journey/"
+               f"contents/content/{lang}/posts?ref={BASE_SHA}")
         req = urllib.request.Request(url, headers={"User-Agent": "b3-test"})
         try:
             with urllib.request.urlopen(req, timeout=10) as r:
                 entries = json.loads(r.read().decode("utf-8"))
         except (OSError, ValueError):
-            return None
+            api_ok = False
+            break
         if not isinstance(entries, list):
-            return None
-        out[lang] = sorted(e["name"] for e in entries if e.get("type") == "dir")
-    return out
+            api_ok = False
+            break
+        fetched[lang] = sorted(e["name"] for e in entries if e.get("type") == "dir")
+    if api_ok:
+        out = {}
+        for lang, slugs in fetched.items():
+            pairs = []
+            for slug in slugs:
+                title = embedded[lang].get(slug)
+                if title is None:
+                    check(f"base-{lang} inventory",
+                          False, f"slug {slug} from base {BASE_SHA[:8]} "
+                          "has no embedded title; BASE_INVENTORY is stale")
+                    continue
+                pairs.append((slug, title))
+            out[lang] = pairs
+        return out, "api"
+    if not NO_EMBEDDED_BASE:
+        out = {lang: sorted(pairs) for lang, pairs in BASE_INVENTORY.items()}
+        return out, "embedded"
+    if STRICT:
+        fail("base inventory unavailable in strict mode: GitHub API "
+             f"unreachable ({GITHUB_API_BASE}) and embedded baseline "
+             "disabled (B3_NO_EMBEDDED_BASE=1); the release gate needs "
+             "a baseline to prove historical routes are preserved")
+    return None, None
 
 
-def check_posts(pg, lang, base_slugs):
+def check_posts(pg, lang, base_inv):
     path = "/My-AI-Journey/posts/" if lang == "en" else "/My-AI-Journey/es/posts/"
     resp = pg.goto(f"{BASE}{path}", wait_until="networkidle")
     check(f"posts-{lang} http", resp is not None and resp.status == 200,
@@ -394,18 +503,20 @@ def check_posts(pg, lang, base_slugs):
     check(f"posts-{lang} links", sorted(hrefs) == want,
           f"got {sorted(hrefs)!r}, want {want!r}")
 
-    # Base preservation: every post on the live site (main) must still
-    # be listed, and its detail page must load and render as a post.
-    # This catches a deleted or renamed slug, which the candidate-tree
-    # checks above cannot see because they only check what exists.
-    if base_slugs is None:
+    # Base preservation: every historical post URL from the pinned base
+    # must still resolve and render its intended content. Redirects
+    # are NOT permitted for these URLs: a redirect means the URL
+    # moved, which is a preservation failure, so the final URL must
+    # equal the requested URL. Content identity is the expected title
+    # (verbatim frontmatter at the pinned base) appearing in the page.
+    if base_inv is None:
         skip(f"base-{lang} routes",
-             "GitHub API unreachable; base inventory not fetched")
+             "base inventory unavailable; historical preservation not checked")
         return
     listed = sorted(u[len(prefix):-1] for u in hrefs if u.startswith(prefix))
-    missing = sorted(set(base_slugs) - set(listed))
+    missing = sorted(set(s for s, _ in base_inv) - set(listed))
     check(f"base-{lang} all listed", not missing, f"missing: {missing}")
-    for slug in base_slugs:
+    for slug, title in base_inv:
         sub = "es/" if lang == "es" else ""
         url = f"{BASE}/My-AI-Journey/{sub}posts/{slug}/"
         try:
@@ -413,11 +524,17 @@ def check_posts(pg, lang, base_slugs):
             with urllib.request.urlopen(req, timeout=10) as r:
                 body = r.read()
                 final = r.geturl()
+                status = r.status
         except OSError as exc:
             check(f"base-{lang} {slug} loads", False, str(exc))
             continue
+        check(f"base-{lang} {slug} status 200", status == 200,
+              f"status={status}")
         check(f"base-{lang} {slug} no redirect", final == url,
               f"redirected to {final}")
+        text = html.unescape(body.decode("utf-8", "replace"))
+        check(f"base-{lang} {slug} title", title in text,
+              "detail page does not carry its expected title")
         # The minified detail page writes the article tag unquoted
         # (<article class=post-single>); the marker is the class name.
         check(f"base-{lang} {slug} renders post", b"post-single" in body,
@@ -434,42 +551,62 @@ def start_server(serve_dir):
     a free port and the server keeps the bound socket, so there is no
     race between picking a port and binding it, and the build is never
     exposed on the network. The socket is bound in the constructor, so
-    the server answers as soon as this returns.
+    the server answers as soon as this returns. If the serving thread
+    itself fails to start, the socket is closed before the error
+    propagates, so no bound socket is left behind.
     """
     handler = functools.partial(QuietHandler, directory=str(serve_dir))
     srv = ThreadingHTTPServer(("127.0.0.1", 0), handler)
-    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+    except Exception:
+        srv.server_close()
+        raise
     return srv
 
 
 def source_files():
-    for name in ("content", "layouts", "data", "assets", "static", "themes"):
+    for name in ("content", "layouts", "data", "assets", "static",
+                 "themes", "archetypes", "i18n"):
         d = WORK / name
         if d.is_dir():
             for p in d.rglob("*"):
                 if p.is_file() and not any(part.startswith(".") for part in p.parts):
                     yield p
-    p = WORK / "hugo.toml"
-    if p.is_file():
-        yield p
+    for name in ("hugo.toml", "hugo.yaml", "hugo.json", "config.toml",
+                 "config.yaml", "config.json"):
+        p = WORK / name
+        if p.is_file():
+            yield p
 
 
-def ensure_build():
-    """Rebuild the site with Hugo when a binary is available
-    (HUGO_BIN, or hugo on PATH); otherwise verify public/ exists and
-    is newer than every source file, and fail loudly instead of
-    testing a stale build.
+def ensure_build(serve_root):
+    """Produce the build that will be served, into serve_root.
+
+    When a Hugo binary is available (HUGO_BIN, or hugo on PATH) the
+    site is built into serve_root, a fresh empty directory inside the
+    temporary serve tree, so no stale file from an earlier build can
+    survive. When no Hugo binary is available, strict mode fails
+    loudly (Hugo is required for a release decision) and local mode
+    verifies public/ exists and is newer than every source file, then
+    copies it into serve_root; that timestamp check is a heuristic,
+    not release evidence.
     """
     hugo = os.environ.get("HUGO_BIN") or shutil.which("hugo")
     if hugo:
         try:
-            r = subprocess.run([hugo, "--gc", "--minify"], cwd=WORK,
-                               capture_output=True, text=True)
+            r = subprocess.run([hugo, "--gc", "--minify",
+                                "--destination", str(serve_root)],
+                               cwd=WORK, capture_output=True, text=True)
         except OSError as exc:
             fail(f"HUGO_BIN={hugo} cannot run: {exc}")
         if r.returncode != 0:
             fail(f"hugo build failed: {r.stderr.strip()[-500:]}")
         return
+    if STRICT:
+        fail("Hugo is required in strict mode: no HUGO_BIN and no "
+             "hugo on PATH; a timestamp-only fallback is not release "
+             "evidence, so the release gate cannot run")
     if not (PUBLIC / "index.html").is_file():
         fail("public/ build missing and no hugo found; run "
              "`hugo --gc --minify` in the repo root, or set HUGO_BIN "
@@ -483,25 +620,31 @@ def ensure_build():
              + ", ".join(stale[:5])
              + "; run `hugo --gc --minify` in the repo root, or set "
              "HUGO_BIN to a hugo binary")
+    shutil.copytree(PUBLIC, serve_root)
 
 
 def main():
     out_env = os.environ.get("B3_TEST_OUT")
     out_dir = Path(out_env) if out_env else Path(tempfile.mkdtemp(prefix="b3-test-"))
     out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"mode: {'strict' if STRICT else 'local'}")
 
-    ensure_build()
-    if not (PUBLIC / "index.html").is_file() or not (PUBLIC / "es" / "index.html").is_file():
-        fail("public/ build missing the EN or ES homepage after the build step")
+    base, base_source = fetch_base_inventory()
+    if base is not None:
+        print(f"base inventory: {base_source} "
+              f"(en {len(base['en'])}, es {len(base['es'])} posts, "
+              f"base {BASE_SHA[:8]})")
 
-    base = fetch_base_slugs()
-
-    # TemporaryDirectory is the lifecycle guard: the served copy of the
-    # build is removed even if the copy, the server start, or any check
-    # fails. No symlink is used, so no platform permission is needed.
+    # TemporaryDirectory is the lifecycle guard: the build output and
+    # the served copy are removed even if the build, the server start,
+    # or any check fails. No symlink is used, so no platform
+    # permission is needed.
     with tempfile.TemporaryDirectory(prefix="b3serve-") as serve_dir:
         root = Path(serve_dir) / "My-AI-Journey"
-        shutil.copytree(PUBLIC, root)
+        ensure_build(root)
+        if not (root / "index.html").is_file() or not (root / "es" / "index.html").is_file():
+            fail("served build missing the EN or ES homepage after the build step")
+
         srv = start_server(serve_dir)
         global BASE
         BASE = f"http://127.0.0.1:{srv.server_address[1]}"
@@ -548,6 +691,9 @@ def main():
         for s in skipped:
             print(f"  - {s}")
     print(f"evidence: {out_dir}")
+    if STRICT and skipped:
+        print("STRICT: skipped checks are not allowed for a release decision")
+        return 1
     return 1 if failures else 0
 
 
