@@ -28,6 +28,9 @@ alternateNames:
   - Eduardo Jaramillo
 
 jobTitle: Research Engineer, Agentic Platforms
+# Spanish rendering of the role, used on ES pages. Faithful translation;
+# the owner confirms the exact wording (see RESP-026 plan B).
+jobTitleEs: Ingeniero de Investigación, Plataformas Agénticas
 organization:
   name: Teradata
   url: https://www.teradata.com
@@ -72,6 +75,9 @@ profiles:
   email: mailto:ejaramillobarrera@gmail.com
 
 tagline: "I test whether AI agents actually work: memory, evaluation, observability."
+# Spanish rendering of the tagline, used on ES pages. Faithful translation;
+# the owner confirms the exact wording (see RESP-026 plan B).
+taglineEs: "Pruebo si los agentes de IA realmente funcionan: memoria, evaluación, observabilidad."
 oneLiner: "Economist by training. Agent researcher by craft."
 
 # Homepage bio (Phase III-D, publication hub). Wording proposed by Ari in
@@ -136,6 +142,15 @@ knowsAbout:
   - Economics
   - Human-AI Interaction
   - Statistical Experimentation
+
+# Spanish homepage chips, first 4 in the same order as knowsAbout.
+# Faithful translations; the owner confirms the exact wording
+# (see RESP-026 plan B).
+chipsEs:
+  - Memoria de agentes
+  - Evaluación de LLM
+  - Observabilidad de agentes
+  - IA agéntica
 
 # Research interests, grouped in three domains. Data only in this phase;
 # dedicated Research pages that render these groups land in a later phase.
