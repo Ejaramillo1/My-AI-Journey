@@ -5,7 +5,10 @@
    pieces) + a separate "More on Substack" CTA. No blog post list on the
    home page; /posts/ keeps the full list. One H1: the display name.
    All identity strings come from data/identity.yaml; nothing is
-   hardcoded here except the EN/ES labels. */}}
+   hardcoded here except the EN/ES labels. Spanish role, tagline and
+   chips come from the *Es fields in identity.yaml. Social links carry
+   the same new-tab indication (aria-label + visual marker) as
+   publication links (RESP-026 plan B). */}}
 {{- define "main" }}
 {{- $id := site.Data.identity }}
 {{- $isEs := eq site.Language.Lang "es" }}
@@ -19,24 +22,26 @@
 <div class="home-hub">
   <section class="first-entry home-info profile-panel" aria-label="{{ $id.displayName }}">
     <div class="hero-rain" aria-hidden="true"></div>
-    <p class="profile-eyebrow">{{ $id.jobTitle }} · {{ $id.organization.name }}</p>
+    <p class="profile-eyebrow">{{ if $isEs }}{{ $id.jobTitleEs }}{{ else }}{{ $id.jobTitle }}{{ end }} · {{ $id.organization.name }}</p>
     <header class="entry-header">
       <h1>{{ $id.displayName }}</h1>
     </header>
-    <p class="hero-tagline">{{ $id.tagline }}</p>
+    <p class="hero-tagline">{{ if $isEs }}{{ $id.taglineEs }}{{ else }}{{ $id.tagline }}{{ end }}</p>
     <div class="entry-content md-content">
       <p>{{ if $isEs }}{{ $id.bioEs }}{{ else }}{{ $id.bio }}{{ end }}</p>
     </div>
+    {{- $chips := $id.knowsAbout }}
+    {{- if $isEs }}{{ $chips = $id.chipsEs }}{{ end }}
     <ul class="profile-chips" aria-label="{{ if $isEs }}Temas de investigación{{ else }}Research topics{{ end }}">
-      {{- range first 4 $id.knowsAbout }}
+      {{- range first 4 $chips }}
       <li>{{ . }}</li>
       {{- end }}
     </ul>
     <div class="profile-social">
       {{- range $socials }}
-      <a href="{{ .url }}" target="_blank" rel="noopener noreferrer me" title="{{ .label }}" aria-label="{{ .label }}">
+      <a href="{{ .url }}" target="_blank" rel="noopener noreferrer me" title="{{ .label }}" aria-label="{{ .label }}, {{ if $isEs }}se abre en una pestaña nueva{{ else }}opens in a new tab{{ end }}">
         {{ partial "svg.html" (dict "name" .name) }}
-        <span>{{ .label }}</span>
+        <span>{{ .label }} <span aria-hidden="true">↗</span></span>
       </a>
       {{- end }}
     </div>
