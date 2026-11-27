@@ -1,0 +1,26 @@
+{{/* Profile links on profile pages (About, issue #5).
+     PaperMod's extend_post_content hook runs after the post body, before the
+     footer. The share buttons are disabled on these pages via
+     disableShare: true in front matter; the verified profile links from
+     data/identity.yaml are shown instead, reusing the homepage's
+     .profile-social markup and icons. Only renders when profilePage is set,
+     so blog posts are unaffected. */}}
+{{- if .Params.profilePage }}
+{{- $id := site.Data.identity }}
+{{- $isEs := eq .Lang "es" }}
+{{- $socials := slice
+  (dict "name" "github" "label" "GitHub" "url" $id.profiles.github)
+  (dict "name" "linkedin" "label" "LinkedIn" "url" $id.profiles.linkedin)
+  (dict "name" "orcid" "label" "ORCID" "url" $id.profiles.orcid)
+  (dict "name" "medium" "label" "Medium" "url" $id.profiles.medium)
+  (dict "name" "substack" "label" "Substack" "url" $id.profiles.substackPublication)
+}}
+<div class="profile-social" aria-label="{{ if $isEs }}Perfiles profesionales{{ else }}Professional profiles{{ end }}">
+  {{- range $socials }}
+  <a href="{{ .url }}" target="_blank" rel="noopener noreferrer me" title="{{ .label }}" aria-label="{{ .label }}, {{ if $isEs }}se abre en una pestaña nueva{{ else }}opens in a new tab{{ end }}">
+    {{ partial "svg.html" (dict "name" .name) }}
+    <span>{{ .label }} <span aria-hidden="true">↗</span></span>
+  </a>
+  {{- end }}
+</div>
+{{- end }}

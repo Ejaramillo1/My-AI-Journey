@@ -8,6 +8,9 @@ layout: "page"
 # a ProfilePage block with the Person entity as mainEntity).
 author: "José Eduardo Jaramillo Barrera"
 profilePage: true
+# disableShare: the share buttons link out to share-intent URLs that do not
+# open a composer for this page (issue #5); profile links are shown instead.
+disableShare: true
 cover:
   image: "images/hero-bg.jpg"
   alt: "Rainy neon city street in pink and cyan, the visual motif of the blog"

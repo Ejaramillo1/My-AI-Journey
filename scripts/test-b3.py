@@ -541,6 +541,89 @@ def check_posts(pg, lang, base_inv):
               "detail page has no post-single article")
 
 
+ABOUT_JS = """() => {
+  const q = s => document.querySelector(s);
+  const qa = s => [...document.querySelectorAll(s)];
+  const marker = a => { const m = a.querySelector('span[aria-hidden="true"]');
+    return m ? m.textContent.trim() : null; };
+  const link = a => a ? { href: a.getAttribute('href'),
+    text: a.textContent.replace(/[↗→]/g, '').trim(),
+    target: a.getAttribute('target'), rel: a.getAttribute('rel') || '',
+    aria: a.getAttribute('aria-label') || '', marker: marker(a) } : null;
+  return {
+    docScrollW: document.documentElement.scrollWidth,
+    winW: window.innerWidth,
+    shareCount: qa('.share-buttons').length,
+    socials: qa('.profile-social a').map(a => ({ ...link(a),
+      svgW: (() => { const s = a.querySelector('svg');
+        return s ? Math.round(s.getBoundingClientRect().width) : null; })() })),
+    ldjson: [...document.querySelectorAll('script[type="application/ld+json"]')].map(s => {
+      try { return JSON.parse(s.textContent); }
+      catch (e) { return { __parseError: String(e) }; } }),
+  };
+}"""
+
+
+def check_about(pg, width, lang):
+    """About page (issue #5): no share widget, five verified profile
+    links, ProfilePage schema preserved. Blog post sharing unchanged."""
+    key = f"about-{width}-{lang}"
+    url_path = "/My-AI-Journey/about/" if lang == "en" else "/My-AI-Journey/es/about/"
+    resp = pg.goto(f"{BASE}{url_path}", wait_until="networkidle")
+    check(f"{key} http", resp is not None and resp.status == 200,
+          f"status={resp.status if resp else None}")
+    pg.wait_for_timeout(300)
+    m = pg.evaluate(ABOUT_JS)
+
+    # No share widget on About (disableShare: true).
+    check(f"{key} no share buttons", m["shareCount"] == 0,
+          f"got {m['shareCount']} .share-buttons")
+    # No layout overflow.
+    check(f"{key} no overflow", m["docScrollW"] <= m["winW"],
+          f"scrollW={m['docScrollW']} winW={m['winW']}")
+
+    # Five verified profile links, same new-tab indication as homepage.
+    check(f"{key} social count", len(m["socials"]) == 5,
+          f"got {len(m['socials'])}")
+    for i, want_href in enumerate(ID["socialHrefs"]):
+        s = m["socials"][i] if i < len(m["socials"]) else {}
+        check(f"{key} social{i} href", s.get("href") == want_href,
+              f"got {s.get('href')!r}, want {want_href!r}")
+        check(f"{key} social{i} target", s.get("target") == "_blank",
+              f"got {s.get('target')!r}")
+        check(f"{key} social{i} rel", "noopener" in s.get("rel", ""),
+              f"got {s.get('rel')!r}")
+        check(f"{key} social{i} aria", NEW_TAB[lang] in s.get("aria", ""),
+              f"got {s.get('aria')!r}")
+        check(f"{key} social{i} marker", s.get("marker") == "↗",
+              f"got {s.get('marker')!r}")
+        check(f"{key} social{i} svg", s.get("svgW") == 54,
+              f"got {s.get('svgW')!r}")
+
+    # ProfilePage schema preserved (About emits a ProfilePage block
+    # with the Person entity as mainEntity).
+    blocks = [b for b in m["ldjson"] if isinstance(b, dict)]
+    check(f"{key} ld+json parses", all("__parseError" not in b for b in blocks),
+          f"{[b for b in blocks if '__parseError' in b]}")
+    profiles = [b for b in blocks if b.get("@type") == "ProfilePage"]
+    check(f"{key} profilepage block", len(profiles) == 1,
+          f"got {len(profiles)}")
+    if profiles:
+        main = profiles[0].get("mainEntity") or {}
+        check(f"{key} profilepage mainEntity", main.get("@type") == "Person",
+              f"got {main.get('@type')!r}")
+
+    # Blog post sharing unchanged: a post still renders share buttons.
+    post_path = ("/My-AI-Journey/posts/architecture-layers/"
+                 if lang == "en" else "/My-AI-Journey/es/posts/architecture-layers/")
+    resp2 = pg.goto(f"{BASE}{post_path}", wait_until="networkidle")
+    check(f"{key} post http", resp2 is not None and resp2.status == 200,
+          f"status={resp2.status if resp2 else None}")
+    pg.wait_for_timeout(300)
+    n = pg.evaluate("() => document.querySelectorAll('.share-buttons').length")
+    check(f"{key} post share buttons", n == 1, f"got {n}")
+
+
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -672,6 +755,16 @@ def main():
                     check_posts(pg, "es", base["es"] if base else None)
                 finally:
                     pg.close()
+                # About (issue #5): no share widget, five profile links,
+                # ProfilePage preserved; blog post sharing unchanged.
+                # Light theme, desktop + narrow widths, both languages.
+                for width in (1440, 390):
+                    for lang in ("en", "es"):
+                        pg = browser.new_page(viewport={"width": width, "height": 1000})
+                        try:
+                            check_about(pg, width, lang)
+                        finally:
+                            pg.close()
                 browser.close()
             (out_dir / "measurements-b3.json").write_text(
                 json.dumps(results, indent=1), encoding="utf-8")
