@@ -1,0 +1,240 @@
+# CI reproducibility check — no deploy.
+#
+# Purpose: reproduce the release gate (scripts/test-b3.py --strict) from a
+# clean checkout in CI, and validate the pinned PR base the same way.
+# This provides F2 partial evidence (pinned-base build validation with
+# a URL inventory) and produces the clean-checkout evidence for F4 in
+# CI. F4 closes only with a successful CI run on the scoped PR, not
+# with this file alone.
+#
+# Honest note on the base inventory: scripts/test-b3.py obtains its own
+# historical-route baseline from the GitHub API at the pinned base SHA
+# (the slug list) plus the titles embedded in the script; when the API
+# is unreachable it falls back to the embedded inventory. That
+# API-derived baseline is NOT a build of the pinned base. This workflow
+# adds the missing piece: it checks out the pinned base commit, builds
+# it with pinned Hugo, and inventories the post URLs from the built
+# sitemaps, saving base-url-inventory.json as an artifact. The two
+# inventories are independent evidence; comparing them for exact
+# equality is F1, a test-script refinement tracked separately and not
+# done by this workflow.
+#
+# Limitation (recorded explicitly): the pinned-base inventory covers
+# only sitemap URLs containing /posts/. It does NOT cover aliases or
+# custom paths, and the base inventory is not compared against
+# candidate routes. This is F2 partial evidence, not proof that all
+# routes are preserved. Counts per language are recorded in
+# base-url-inventory.json (expected 6 EN / 5 ES from the earlier API
+# inventory); investigate mismatches rather than hide them. The
+# pinned base SHA is verified by git rev-parse and the build output
+# paths (base/public/en/sitemap.xml and base/public/es/sitemap.xml)
+# are asserted to exist before the inventory runs.
+#
+# Negative checks not run by CI: the missing-Hugo and stale-output
+# negative checks from the clean-checkout evidence are not executed by
+# this workflow; they were run locally and are preserved in the vault
+# evidence folder (scope-additions/evidence/). They are recorded
+# separately, not by CI.
+#
+# Residual drift (disclosed): the runner is pinned to ubuntu-24.04,
+# Python to 3.12.7 and pip to 24.3.1, and Hugo and Playwright are
+# pinned, but the action major tags below (actions/checkout@v4,
+# peaceiris/actions-hugo@v3, actions/setup-python@v5,
+# actions/upload-artifact@v4) are mutable and could move between
+# runs. Full reviewed action commit-SHA pins are preferable for
+# supply-chain integrity; they are not used here because the reviewed
+# SHAs were not verified at authoring time.
+#
+# No deploy: this workflow never publishes, never touches GitHub Pages,
+# and runs with contents: read only. The deploy workflow
+# (.github/workflows/hugo.yml) is untouched and remains the only path
+# to Pages. No merge is performed by this workflow.
+
+name: CI reproducibility (no deploy)
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-reproducibility-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    env:
+      BASE_SHA: 752423511a272ecd1c488fe1f97957c69604a39e
+      HUGO_VERSION: "0.152.2"
+      PYTHON_VERSION: "3.12.7"
+      PIP_VERSION: "24.3.1"
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install pinned Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+
+      - name: Record candidate SHA and tool versions
+        run: |
+          set -euo pipefail
+          mkdir -p ci-evidence
+          git rev-parse HEAD > ci-evidence/candidate-sha.txt
+          hugo version > ci-evidence/hugo-version.txt
+          cat ci-evidence/candidate-sha.txt
+          cat ci-evidence/hugo-version.txt
+
+      - name: Check out pinned base
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASE_SHA }}
+          path: base
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify pinned base SHA
+        run: |
+          set -euo pipefail
+          cd base
+          git rev-parse HEAD > ../ci-evidence/base-sha.txt
+          ACTUAL="$(cat ../ci-evidence/base-sha.txt)"
+          echo "pinned base SHA: ${{ env.BASE_SHA }}"
+          echo "checked-out base SHA: $ACTUAL"
+          test "$ACTUAL" = "${{ env.BASE_SHA }}"
+
+      - name: Build pinned base
+        run: |
+          set +e
+          set -o pipefail
+          cd base
+          hugo --gc --minify 2>&1 | tee ../ci-evidence/base-build.log
+          status=${PIPESTATUS[0]}
+          echo "$status" > ../ci-evidence/base-build.exit
+          exit $status
+
+      - name: Inventory URLs from pinned-base build
+        run: |
+          set -euo pipefail
+          python3 - <<'PYEOF' 2>&1 | tee ci-evidence/base-inventory.log
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          BASE_SHA = "752423511a272ecd1c488fe1f97957c69604a39e"
+          NS = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+          inv = {
+              "base_sha": BASE_SHA,
+              "limitation": "Covers only sitemap URLs containing /posts/. Does not cover aliases or custom paths. F2 partial evidence, not proof that all routes are preserved.",
+              "posts": {},
+              "counts": {},
+          }
+          for lang in ("en", "es"):
+              sm = Path(f"base/public/{lang}/sitemap.xml")
+              assert sm.is_file(), f"missing sitemap for {lang}: {sm}"
+              root = ET.parse(sm).getroot()
+              urls = [el.text for el in root.findall("s:url/s:loc", NS)]
+              posts = sorted(
+                  u for u in urls
+                  if "/posts/" in u and not u.rstrip("/").endswith("/posts")
+              )
+              assert posts, f"pinned-base build produced no post URLs for {lang}"
+              inv["posts"][lang] = posts
+              inv["counts"][lang] = len(posts)
+              print(f"{lang}: {len(posts)} post URLs (expected 6 EN / 5 ES)")
+              for u in posts:
+                  print(f"  {u}")
+          inv["total_posts"] = sum(len(v) for v in inv["posts"].values())
+          Path("base-url-inventory.json").write_text(
+              json.dumps(inv, indent=2) + "\n", encoding="utf-8"
+          )
+          print(f"total post URLs: {inv['total_posts']}")
+          PYEOF
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Record test Python version
+        run: |
+          set -euo pipefail
+          python3 --version > ci-evidence/python-version.txt
+          cat ci-evidence/python-version.txt
+
+      - name: Install test dependencies
+        run: |
+          set -euo pipefail
+          python3 -m pip install "pip==${{ env.PIP_VERSION }}"
+          python3 -m pip install "playwright==1.65.1" "pyyaml==6.0.2"
+          python3 -m playwright install chromium --with-deps
+          python3 -m pip freeze > ci-evidence/pip-freeze.txt
+          python3 -c "import importlib.metadata; print(importlib.metadata.version('playwright'))" > ci-evidence/playwright-version.txt
+
+      - name: Run strict test
+        env:
+          B3_TEST_OUT: ${{ github.workspace }}/b3-test-out
+        run: |
+          set +e
+          set -o pipefail
+          export HUGO_BIN="$(which hugo)"
+          echo "HUGO_BIN=$HUGO_BIN" | tee ci-evidence/strict-test.log
+          "$HUGO_BIN" version 2>&1 | tee -a ci-evidence/strict-test.log
+          python3 scripts/test-b3.py --strict 2>&1 | tee -a ci-evidence/strict-test.log
+          status=${PIPESTATUS[0]}
+          echo "$status" > ci-evidence/strict-test.exit
+          exit $status
+
+      - name: Verify expected artifacts exist
+        if: success()
+        run: |
+          set -euo pipefail
+          test -f base-url-inventory.json
+          test -d b3-test-out
+          test -f b3-test-out/measurements-b3.json
+          test -s ci-evidence/candidate-sha.txt
+          test -s ci-evidence/base-sha.txt
+          test -s ci-evidence/hugo-version.txt
+          test -s ci-evidence/python-version.txt
+          test -s ci-evidence/playwright-version.txt
+          test -s ci-evidence/pip-freeze.txt
+          test -s ci-evidence/base-build.log
+          test -s ci-evidence/base-inventory.log
+          test -s ci-evidence/strict-test.log
+          test -s ci-evidence/base-build.exit
+          test -s ci-evidence/strict-test.exit
+          test "$(cat ci-evidence/base-build.exit)" = "0"
+          test "$(cat ci-evidence/strict-test.exit)" = "0"
+          echo "All expected artifacts present."
+
+      - name: Upload base URL inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: base-url-inventory
+          path: base-url-inventory.json
+
+      - name: Upload strict-test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b3-strict-test-evidence
+          path: b3-test-out/
+
+      - name: Upload CI evidence directory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-evidence
+          path: ci-evidence/
