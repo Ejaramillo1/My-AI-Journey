@@ -113,3 +113,7 @@ DefaultContentLanguage = "en"
   name = "About"
   pageRef = "/about"
   weight = 20
+[[menu.main]]
+  name = "Certificates"
+  pageRef = "/certificates"
+  weight = 30

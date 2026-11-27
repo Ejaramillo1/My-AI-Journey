@@ -1,0 +1,124 @@
+# Certificates + credentials for the Certificates grid page.
+# Source: 16 PDFs Eduardo sent 27 Nov 2026 (Muse Mail 1534603709727432).
+# Reviewed by Hilo 27 Nov 2026 (RESP-078): 14 are certificates/credentials,
+# 2 are CVs (kind: cv). The grid layout renders only kind: certificate.
+# The CVs are kept here (kind: cv, include: false) so they can be added
+# later if Eduardo decides to include them; RESP-078 asks him to decide.
+# Dates are the completion/issue dates read from each PDF.
+# Titles: EN is the certificate's own wording; titleEs is a Spanish
+# rendering for the ES page. Issuers are as printed on the certificate.
+certificates:
+  - id: teradata-sql
+    title: "Teradata SQL"
+    titleEs: "Teradata SQL"
+    issuer: "Teradata"
+    date: "2022-02-14"
+    file: "teradata-sql.pdf"
+    kind: certificate
+  - id: cs50x
+    title: "CS50x"
+    titleEs: "CS50x"
+    issuer: "Harvard (CS50)"
+    date: ""
+    file: "cs50x.pdf"
+    kind: certificate
+  - id: technical-airlift-vantagecloud-lake
+    title: "Technical Airlift for VantageCloud Lake"
+    titleEs: "Technical Airlift para VantageCloud Lake"
+    issuer: "Teradata"
+    date: "2023-06-30"
+    file: "technical-airlift-vantagecloud-lake.pdf"
+    kind: certificate
+  - id: cliftonstrengths-34
+    title: "CliftonStrengths 34 Results"
+    titleEs: "Resultados CliftonStrengths 34"
+    issuer: "Gallup"
+    date: "2026-05-13"
+    file: "cliftonstrengths-34.pdf"
+    kind: certificate
+  - id: cliftonstrengths-top5
+    title: "CliftonStrengths Top 5"
+    titleEs: "CliftonStrengths Top 5"
+    issuer: "Gallup"
+    date: ""
+    file: "cliftonstrengths-top5.pdf"
+    kind: certificate
+  - id: vantage-associate-2-3-certification
+    title: "Vantage Associate 2.3 Certification"
+    titleEs: "Certificación Vantage Associate 2.3"
+    issuer: "Teradata"
+    date: "2022-09-06"
+    file: "vantage-associate-2-3-certification.pdf"
+    kind: certificate
+  - id: intro-to-tdb
+    title: "Introduction to the Teradata Database"
+    titleEs: "Introducción a la base de datos Teradata"
+    issuer: "Teradata"
+    date: "2022-08-05"
+    file: "intro-to-tdb.pdf"
+    kind: certificate
+  - id: coursera-foundations-data-data-everywhere
+    title: "Foundations: Data, Data, Everywhere"
+    titleEs: "Fundamentos: datos, datos, en todas partes"
+    issuer: "Google / Coursera"
+    date: "2022-11-29"
+    file: "coursera-foundations-data-data-everywhere.pdf"
+    kind: certificate
+  - id: coursera-project-initiation
+    title: "Project Initiation: Starting a Successful Project"
+    titleEs: "Inicio de proyecto: cómo empezar un proyecto exitoso"
+    issuer: "Google / Coursera"
+    date: "2024-09-20"
+    file: "coursera-project-initiation.pdf"
+    kind: certificate
+  - id: coursera-project-planning
+    title: "Project Planning: Putting It All Together"
+    titleEs: "Planificación de proyecto: uniendo todo"
+    issuer: "Google / Coursera"
+    date: "2024-12-21"
+    file: "coursera-project-planning.pdf"
+    kind: certificate
+  - id: coursera-foundations-project-management
+    title: "Foundations of Project Management"
+    titleEs: "Fundamentos de la gestión de proyectos"
+    issuer: "Google / Coursera"
+    date: "2024-09-10"
+    file: "coursera-foundations-project-management.pdf"
+    kind: certificate
+  - id: coursera-ask-questions-data-driven-decisions
+    title: "Ask Questions to Make Data-Driven Decisions"
+    titleEs: "Hacer preguntas para tomar decisiones basadas en datos"
+    issuer: "Google / Coursera"
+    date: "2022-12-02"
+    file: "coursera-ask-questions-data-driven-decisions.pdf"
+    kind: certificate
+  - id: coursera-data-scientists-toolbox
+    title: "The Data Scientist's Toolbox"
+    titleEs: "La caja de herramientas del científico de datos"
+    issuer: "Johns Hopkins / Coursera"
+    date: "2017-07-20"
+    file: "coursera-data-scientists-toolbox.pdf"
+    kind: certificate
+  - id: virtual-technical-airlift-2023
+    title: "Virtual Technical Airlift 2023 - On Demand"
+    titleEs: "Technical Airlift virtual 2023 - bajo demanda"
+    issuer: "Teradata"
+    date: "2024-01-26"
+    file: "virtual-technical-airlift-2023.pdf"
+    kind: certificate
+  # CVs — NOT certificates. Kept for reference; excluded from the grid
+  # (kind: cv). RESP-078 asks Eduardo whether to leave them out.
+  - id: cv-2023-eduardo-jaramillo
+    title: "CV 2023 - Eduardo Jaramillo"
+    titleEs: "CV 2023 - Eduardo Jaramillo"
+    issuer: ""
+    date: "2023"
+    file: "cv-2023-eduardo-jaramillo.pdf"
+    kind: cv
+  - id: cv-2024-eduardo-jaramillo
+    title: "CV 2024 - Eduardo Jaramillo"
+    titleEs: "CV 2024 - Eduardo Jaramillo"
+    issuer: ""
+    date: "2024"
+    file: "cv-2024-eduardo-jaramillo.pdf"
+    kind: cv

@@ -1225,3 +1225,50 @@ body.list.home {
         font-size: 25px;
     }
 }
+
+/* ---------- Certificates grid page (Eduardo 27 Nov 2026) ----------
+   Grid of tiles; each tile opens its PDF in a new tab. Uses the site
+   accent + panel variables so it works in both themes. The page uses
+   the 1120px list shell (baseof.html adds class="list" for layout
+   "certificates"), so the grid gets 2-3 columns on desktop. */
+.cert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 24px 0 8px;
+}
+.cert-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--entry);
+    color: var(--primary);
+    text-decoration: none;
+}
+.cert-tile:hover,
+.cert-tile:focus-visible {
+    border-color: var(--accent);
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+.cert-tile-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.35;
+}
+.cert-tile-meta {
+    font-size: 0.9rem;
+    color: var(--secondary);
+}
+.cert-tile-open {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-deep);
+}
+.cert-count {
+    color: var(--secondary);
+    font-size: 0.9rem;
+}

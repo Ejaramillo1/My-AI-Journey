@@ -1,0 +1,33 @@
+{{/* Certificates grid page (new section, Eduardo 27 Nov 2026).
+   Renders a grid of tiles from data/certificates.yaml; each tile opens
+   its PDF in a new tab. Only kind: certificate is rendered; the two CVs
+   (kind: cv) are excluded pending Eduardo's decision (RESP-078).
+   New-tab indication follows the site pattern (RESP-026 plan B):
+   aria-label + visual marker. PDF links use rel="noopener" (documents,
+   not profile links, so no rel="me"). */}}
+{{- define "main" }}
+{{- $isEs := eq site.Language.Lang "es" }}
+{{- $certs := where site.Data.certificates.certificates "kind" "certificate" }}
+<article class="post-single cert-page">
+  <header class="post-header">
+    <h1>{{ .Title }}</h1>
+  </header>
+  <div class="post-content">
+    {{ .Content }}
+  </div>
+  <div class="cert-grid" role="list" aria-label="{{ if $isEs }}Certificados{{ else }}Certificates{{ end }}">
+    {{- range $certs }}
+    {{- $year := "" }}
+    {{- if .date }}{{ $year = (time .date).Format "2006" }}{{ end }}
+    {{- $title := .title }}
+    {{- if $isEs }}{{ $title = .titleEs }}{{ end }}
+    <a class="cert-tile" role="listitem" href="{{ printf "certificates/%s" .file | relURL }}" target="_blank" rel="noopener" aria-label="{{ $title }}, PDF, {{ if $isEs }}se abre en una pestaña nueva{{ else }}opens in a new tab{{ end }}">
+      <span class="cert-tile-title">{{ $title }}</span>
+      <span class="cert-tile-meta">{{ .issuer }}{{ if $year }} · {{ $year }}{{ end }}</span>
+      <span class="cert-tile-open" aria-hidden="true">PDF <span aria-hidden="true">↗</span></span>
+    </a>
+    {{- end }}
+  </div>
+  <p class="cert-count">{{ len $certs }} {{ if $isEs }}certificados{{ else }}certificates{{ end }}</p>
+</article>
+{{- end }}
