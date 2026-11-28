@@ -20,7 +20,7 @@
   <div class="profile-grid">
     {{- with .Params.cover }}
     <figure class="profile-figure" aria-hidden="false">
-      <img src="{{ .image | absURL }}" alt="{{ .alt }}" loading="eager">
+      <img src="{{ .image | relURL }}" alt="{{ .alt }}" loading="eager">
     </figure>
     {{- end }}
     <div class="profile-body">
