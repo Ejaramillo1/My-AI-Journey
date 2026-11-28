@@ -898,10 +898,21 @@ code, pre, kbd {
    publications column get styles here.
    ========================================================================== */
 
-/* Home shell: 1360px (body gets the `home` class from layouts/baseof.html). */
+/* Home shell: responsive, max 1560px (UX-01 / issue #17). The body gets
+   the `home` class from layouts/baseof.html. The shell widens from the
+   old fixed 1360px to a 1560px maximum, and the horizontal padding uses
+   clamp() so the content keeps comfortable side margins at every width
+   instead of touching the viewport edges on very wide screens. Header,
+   main and footer share the same width, so they align. */
 body.list.home {
-    --main-width: 1360px;
-    --nav-width: 1360px;
+    --main-width: 1560px;
+    --nav-width: 1560px;
+}
+
+body.list.home .main,
+body.list.home .nav {
+    padding-left: clamp(16px, 4vw, 48px);
+    padding-right: clamp(16px, 4vw, 48px);
 }
 
 .home-hub {
@@ -949,7 +960,12 @@ body.list.home {
     background: rgba(255, 255, 255, 0.65);
 }
 
-/* Enlarged social buttons: 54px circles with the real PaperMod icons. */
+/* Enlarged social buttons: 54px circles with the real PaperMod icons.
+   UX-03 / issue #19: the anchor width is flexible (min 64px) instead of
+   a fixed 64px, and the label never wraps apart from its arrow, so a
+   long label like "Substack ↗" stays on one line and wraps as a whole
+   tile instead of orphaning the arrow on its own line. Keyboard focus
+   is visible. */
 .profile-social {
     display: flex;
     flex-wrap: wrap;
@@ -962,8 +978,15 @@ body.list.home {
     flex-direction: column;
     align-items: center;
     gap: 7px;
-    width: 64px;
+    width: auto;
+    min-width: 64px;
     text-decoration: none;
+}
+
+.profile-social a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 8px;
 }
 
 .profile-social a svg {
@@ -987,11 +1010,17 @@ body.list.home {
     font-size: 12px;
     font-weight: 600;
     color: var(--secondary);
+    white-space: nowrap;
 }
 
-/* ---------- Publications column ---------- */
+/* ---------- Publications column (UX-05 / issue #21) ----------
+   The column starts at the same height as the profile panel's eyebrow,
+   so the two columns read as one aligned composition instead of the
+   publications heading floating a few pixels low. Each entry gets a
+   little more breathing room for an even rhythm; titles keep their
+   canonical text, dates and links, and the dividers stay quiet. */
 .pub-col {
-    padding-top: 8px;
+    padding-top: 14px;
     min-width: 0;
 }
 
@@ -1281,4 +1310,95 @@ body.list.home {
 .cert-count {
     color: var(--secondary);
     font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   PROFILE PAGE — dedicated About layout (UX-07 / issue #23)
+   The About pages use layout "profile" and get a `profile` class on
+   <body> (layouts/baseof.html). The container is as wide as the homepage
+   shell so the two pages read as one composition. On desktop the city
+   image sits in a left panel (~40%) and the identity — name, role,
+   biography, profile links — in a right column (~60%), with the person
+   near the top instead of below a generic article header. No breadcrumbs,
+   no article date/reading-time/byline, no generic "About" heading: those
+   are omitted by the profile layout template, not hidden here. The exact
+   imagery, effects, palette and animation are untouched; this only
+   arranges them. On narrow screens the columns stack with the identity
+   first. Ordinary articles keep the generic single-post layout.
+   ========================================================================== */
+
+/* Profile shell: same width as the homepage, so About aligns with home. */
+body.profile {
+    --main-width: 1560px;
+    --nav-width: 1560px;
+}
+
+body.profile .main {
+    padding-left: clamp(16px, 4vw, 48px);
+    padding-right: clamp(16px, 4vw, 48px);
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 48px;
+    align-items: start;
+}
+
+.profile-figure {
+    margin: 0;
+    position: sticky;
+    top: 24px;
+}
+
+.profile-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.profile-body {
+    min-width: 0;
+}
+
+.profile-name {
+    margin: 6px 0 0;
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.profile-content {
+    margin-top: 18px;
+}
+
+.profile-content h2 {
+    margin-top: 28px;
+}
+
+.profile-body .profile-social {
+    margin-top: 28px;
+}
+
+/* Stack on narrow screens: identity first, image after. */
+@media (max-width: 900px) {
+    .profile-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
+    }
+
+    .profile-figure {
+        position: static;
+        order: 2;
+    }
+
+    .profile-body {
+        order: 1;
+    }
+
+    .profile-name {
+        font-size: 32px;
+    }
 }

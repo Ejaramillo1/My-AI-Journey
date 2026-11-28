@@ -2,7 +2,7 @@
 title: "Acerca de"
 date: 2026-05-21
 draft: false
-layout: "page"
+layout: "profile"
 # Full-name author (fixes debt D6: PaperMod fell back to params.author,
 # "Eduardo Jaramillo") and ProfilePage flag (Phase III-A: this page emits
 # a ProfilePage block with the Person entity as mainEntity).

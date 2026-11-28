@@ -1,0 +1,38 @@
+{{/* Dedicated profile layout for the About pages (UX-07 / issue #23).
+     The About pages (EN/ES) set layout: "profile" and profilePage: true.
+     Unlike the generic PaperMod single-post layout, this one puts the
+     person first: a wider container aligned with the homepage, the city
+     image in a left panel and the identity (name, role, biography, profile
+     links) in a right column. No breadcrumbs, no article date / reading
+     time / byline, no redundant generic "About" heading, no share buttons.
+     The accessible localized H1 is the display name; the complete approved
+     biography, languages, family section and disclaimer come from the page
+     content; the five verified profile links come from the shared
+     profile-social component. The ProfilePage schema is emitted by the
+     head partial (schema_json.html) for any page with profilePage: true,
+     so it is unaffected by this layout. Ordinary articles keep the
+     generic single-post layout, meta and sharing unchanged. On narrow
+     screens the columns stack with the identity first. */}}
+{{- define "main" }}
+{{- $id := site.Data.identity }}
+{{- $isEs := eq site.Language.Lang "es" }}
+<article class="profile-page">
+  <div class="profile-grid">
+    {{- with .Params.cover }}
+    <figure class="profile-figure" aria-hidden="false">
+      <img src="{{ .image | relURL }}" alt="{{ .alt }}" loading="eager">
+    </figure>
+    {{- end }}
+    <div class="profile-body">
+      <p class="profile-eyebrow">{{ if $isEs }}{{ $id.jobTitleEs }}{{ else }}{{ $id.jobTitle }}{{ end }} · {{ $id.organization.name }}</p>
+      <h1 class="profile-name">{{ $id.displayName }}</h1>
+      <div class="profile-content md-content">
+        {{- if not (.Param "disableAnchoredHeadings") }}
+        {{- partial "anchored_headings.html" .Content -}}
+        {{- else }}{{ .Content }}{{ end }}
+      </div>
+      {{ partial "profile-social.html" . }}
+    </div>
+  </div>
+</article>
+{{- end }}
