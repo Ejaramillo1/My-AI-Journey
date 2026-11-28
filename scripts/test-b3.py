@@ -100,6 +100,7 @@ from pathlib import Path
 
 WORK = Path(__file__).resolve().parents[1]
 IDENTITY = WORK / "data" / "identity.yaml"
+CERTIFICATES = WORK / "data" / "certificates.yaml"
 PUBLIC = WORK / "public"
 
 # Pinned PR base for the historical route inventory. The inventory
@@ -624,6 +625,148 @@ def check_about(pg, width, lang):
     check(f"{key} post share buttons", n == 1, f"got {n}")
 
 
+CERT_JS = """() => {
+  const qa = s => [...document.querySelectorAll(s)];
+  const link = a => a ? { href: a.getAttribute('href'),
+    target: a.getAttribute('target'), rel: a.getAttribute('rel') || '',
+    aria: a.getAttribute('aria-label') || '',
+    role: a.getAttribute('role'),
+    marker: (() => { const spans = [...a.querySelectorAll('span[aria-hidden="true"]')];
+      return spans.some(s => s.textContent.trim() === '↗') ? '↗' : null; })() } : null;
+  return {
+    docScrollW: document.documentElement.scrollWidth,
+    winW: window.innerWidth,
+    tiles: qa('.cert-tile').map(link),
+    items: qa('.cert-tile-item').length,
+    gridIsUl: !!document.querySelector('ul.cert-grid'),
+    countText: (() => { const c = document.querySelector('.cert-count');
+      return c ? c.textContent.trim() : null; })(),
+    menuLabel: (() => { const a = [...document.querySelectorAll('header nav a')].find(x => (x.getAttribute('href') || '').includes('certificates'));
+      return a ? a.textContent.trim() : null; })(),
+  };
+}"""
+
+
+def load_certificates():
+    """Expected certificates from data/certificates.yaml (the single
+    source of truth). Raises ValueError on a missing or malformed file,
+    so a data change fails loudly instead of silently passing."""
+    import yaml
+    try:
+        data = yaml.safe_load(CERTIFICATES.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"certificates.yaml: cannot read: {exc}")
+    except yaml.YAMLError as exc:
+        raise ValueError(f"certificates.yaml: invalid YAML: {exc}")
+    if not isinstance(data, dict) or not isinstance(data.get("certificates"), list):
+        raise ValueError("certificates.yaml: expected a mapping with a certificates list")
+    return data["certificates"]
+
+
+def check_certificates(pg, width, lang):
+    """Certificates grid (issue #15 / REVIEW-059): approved tile count,
+    correct PDF links, no CVs in source or generated output, keyboard
+    focus, no overflow, localized menu label."""
+    key = f"cert-{width}-{lang}"
+    certs = load_certificates()
+    # Source must not contain any CV entry (containment, REVIEW-059).
+    check(f"{key} source no cv entries",
+          all(c.get("kind") == "certificate" for c in certs),
+          f"kinds={sorted({c.get('kind') for c in certs})}")
+    check(f"{key} source tile count", len(certs) == 14,
+          f"got {len(certs)}")
+    url_path = ("/My-AI-Journey/certificates/" if lang == "en"
+                else "/My-AI-Journey/es/certificates/")
+    resp = pg.goto(f"{BASE}{url_path}", wait_until="networkidle")
+    check(f"{key} http", resp is not None and resp.status == 200,
+          f"status={resp.status if resp else None}")
+    pg.wait_for_timeout(300)
+    m = pg.evaluate(CERT_JS)
+
+    # No layout overflow.
+    check(f"{key} no overflow", m["docScrollW"] <= m["winW"],
+          f"scrollW={m['docScrollW']} winW={m['winW']}")
+    # Grid is a <ul> with <li> items; anchors keep their native link
+    # role (no role="listitem" overriding it).
+    check(f"{key} grid is ul", m["gridIsUl"], "grid is not a <ul>")
+    check(f"{key} item count", m["items"] == len(certs),
+          f"got {m['items']}")
+    check(f"{key} tile count", len(m["tiles"]) == len(certs),
+          f"got {len(m['tiles'])}")
+    want_count = (f"{len(certs)} "
+                  f"{'certificados' if lang == 'es' else 'certificates'}")
+    check(f"{key} count text", m["countText"] == want_count,
+          f"got {m['countText']!r}")
+    # Menu label localized (REVIEW-059).
+    want_label = "Certificados" if lang == "es" else "Certificates"
+    check(f"{key} menu label", m["menuLabel"] == want_label,
+          f"got {m['menuLabel']!r}")
+
+    # Each tile: unique correct PDF href, new-tab indication, no CV.
+    seen = set()
+    for i, c in enumerate(certs):
+        t = m["tiles"][i] if i < len(m["tiles"]) else {}
+        want_href = f"/My-AI-Journey/certificates/{c['file']}"
+        check(f"{key} tile{i} href", t.get("href") == want_href,
+              f"got {t.get('href')!r}, want {want_href!r}")
+        check(f"{key} tile{i} unique", t.get("href") not in seen,
+              f"duplicate {t.get('href')!r}")
+        seen.add(t.get("href"))
+        check(f"{key} tile{i} no cv", "cv-" not in (t.get("href") or ""),
+              f"got {t.get('href')!r}")
+        check(f"{key} tile{i} target", t.get("target") == "_blank",
+              f"got {t.get('target')!r}")
+        check(f"{key} tile{i} rel", "noopener" in (t.get("rel") or ""),
+              f"got {t.get('rel')!r}")
+        check(f"{key} tile{i} aria", NEW_TAB[lang] in (t.get("aria") or ""),
+              f"got {t.get('aria')!r}")
+        check(f"{key} tile{i} marker", t.get("marker") == "↗",
+              f"got {t.get('marker')!r}")
+        check(f"{key} tile{i} link role", t.get("role") is None,
+              f"got role={t.get('role')!r}")
+
+    # Each PDF: HTTP 200, application/pdf, %PDF- signature.
+    for i, c in enumerate(certs):
+        url = f"{BASE}/My-AI-Journey/certificates/{c['file']}"
+        try:
+            with urllib.request.urlopen(url, timeout=10) as r:
+                head = r.read(5)
+                ctype = r.headers.get("Content-Type", "")
+                check(f"{key} pdf{i} http", r.status == 200,
+                      f"status={r.status}")
+                check(f"{key} pdf{i} content-type",
+                      "application/pdf" in ctype, f"got {ctype!r}")
+                check(f"{key} pdf{i} signature", head == b"%PDF-",
+                      f"got {head!r}")
+        except Exception as e:
+            check(f"{key} pdf{i} fetch", False,
+                  f"{type(e).__name__}: {e}")
+
+    # Excluded files must 404 in the generated output.
+    for bad in ("cv-2023-eduardo-jaramillo.pdf",
+                "cv-2024-eduardo-jaramillo.pdf"):
+        url = f"{BASE}/My-AI-Journey/certificates/{bad}"
+        try:
+            with urllib.request.urlopen(url, timeout=10) as r:
+                check(f"{key} excluded {bad} 404", False,
+                      f"returned {r.status}, expected 404")
+        except urllib.error.HTTPError as e:
+            check(f"{key} excluded {bad} 404", e.code == 404,
+                  f"got {e.code}")
+        except Exception as e:
+            check(f"{key} excluded {bad} 404", False,
+                  f"{type(e).__name__}: {e}")
+
+    # Keyboard focus: the first tile link can take focus.
+    focused = pg.evaluate("""() => {
+      const a = document.querySelector('.cert-tile');
+      if (!a) return null;
+      a.focus();
+      return document.activeElement === a;
+    }""")
+    check(f"{key} keyboard focus", focused is True, f"got {focused!r}")
+
+
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -763,6 +906,16 @@ def main():
                         pg = browser.new_page(viewport={"width": width, "height": 1000})
                         try:
                             check_about(pg, width, lang)
+                        finally:
+                            pg.close()
+                # Certificates (issue #15 / REVIEW-059): approved tiles,
+                # correct PDF links, no CVs, keyboard focus, no
+                # overflow, localized menu label. Same widths/languages.
+                for width in (1440, 390):
+                    for lang in ("en", "es"):
+                        pg = browser.new_page(viewport={"width": width, "height": 1000})
+                        try:
+                            check_certificates(pg, width, lang)
                         finally:
                             pg.close()
                 browser.close()
