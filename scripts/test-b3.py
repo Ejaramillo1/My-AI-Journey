@@ -339,7 +339,10 @@ def check_homepage(pg, theme, width, lang, out_dir, results):
     check(f"{key} no overflow", m["docScrollW"] <= m["winW"],
           f"scrollW={m['docScrollW']} winW={m['winW']}")
     if width in (1920, 1440):
-        check(f"{key} home shell", m["mainW"] is not None and 1300 <= m["mainW"] <= 1450,
+        # UX-01 / issue #17: the home shell widened from a fixed 1360px to
+        # a responsive 1560px maximum. At 1920px the main measures ~1608px
+        # (1560 + 2*gap); at 1440px it fills the viewport (~1440px).
+        check(f"{key} home shell", m["mainW"] is not None and 1300 <= m["mainW"] <= 1650,
               f"mainW={m['mainW']}")
 
     # Identity: H1, role eyebrow, tagline, bio, chips.

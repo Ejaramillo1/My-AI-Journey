@@ -1,8 +1,10 @@
-{{/* PaperMod baseof.html, overridden only to add a `home` class to <body>
-   on the homepage (Phase III-D, B3). The 1360px home shell is scoped to
+{{/* PaperMod baseof.html, overridden to add a `home` class to <body>
+   on the homepage (Phase III-D, B3) and a `profile` class on profile
+   pages (UX-07 / issue #23). The 1360px home shell is scoped to
    body.list.home in assets/css/extended/custom.css; every other list
-   page keeps the D4 1120px shell. Keep this file in sync with the theme
-   version when PaperMod updates. */}}
+   page keeps the D4 1120px shell. The profile shell is scoped to
+   body.profile. Keep this file in sync with the theme version when
+   PaperMod updates. */}}
 {{- if lt hugo.Version "0.146.0" }}
 {{- errorf "=> hugo v0.146.0 or greater is required for hugo-PaperMod to build " }}
 {{- end -}}
@@ -24,7 +26,7 @@
 {{- if (or (ne .Kind `page` ) (eq .Layout `archives`) (eq .Layout `search`) (eq .Layout `certificates`)) }}
 <body class="list{{ if .IsHome }} home{{ end }}" id="top">
 {{- else }}
-<body id="top">
+<body{{ if .Params.profilePage }} class="profile"{{ end }} id="top">
 {{- end }}
     {{ partialCached "header.html" . .Page -}}
     <main class="main">

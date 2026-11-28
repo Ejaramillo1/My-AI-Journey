@@ -97,10 +97,9 @@ DefaultContentLanguage = "en"
       name = "Blog"
       pageRef = "/posts"
       weight = 10
-    [[languages.en.menu.main]]
-      name = "About"
-      pageRef = "/about"
-      weight = 20
+    # About is NOT in the header menu (UX-02 / issue #18): the homepage
+    # hero already has a clear "About me" entry, so the header link was
+    # redundant. About stays reachable from the hero and by direct URL.
     [[languages.en.menu.main]]
       name = "Certificates"
       pageRef = "/certificates"
@@ -117,10 +116,9 @@ DefaultContentLanguage = "en"
       name = "Blog"
       pageRef = "/posts"
       weight = 10
-    [[languages.es.menu.main]]
-      name = "About"
-      pageRef = "/about"
-      weight = 20
+    # About is NOT in the header menu (UX-02 / issue #18): the homepage
+    # hero already has a clear "Acerca de mí" entry, so the header link
+    # was redundant. About stays reachable from the hero and by direct URL.
     [[languages.es.menu.main]]
       name = "Certificados"
       pageRef = "/certificates"
