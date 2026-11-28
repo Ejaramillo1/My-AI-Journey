@@ -1,9 +1,15 @@
 # Certificates + credentials for the Certificates grid page.
 # Source: 16 PDFs Eduardo sent 27 Nov 2026 (Muse Mail 1534603709727432).
 # Reviewed by Hilo 27 Nov 2026 (RESP-078): 14 are certificates/credentials,
-# 2 are CVs (kind: cv). The grid layout renders only kind: certificate.
-# The CVs are kept here (kind: cv, include: false) so they can be added
-# later if Eduardo decides to include them; RESP-078 asks him to decide.
+# 2 are CVs (2023, 2024). Eduardo DECIDED 27 Nov 14:53 PST to leave the CVs
+# out. The CV PDFs were briefly committed to the public branch in PR #8
+# (commit 20742d4) and REMOVED by containment commits f8074161 (CV 2023)
+# and 93cf5328 (CV 2024) after Ari's REVIEW-059 (27 Nov 15:55 PST) flagged
+# the exposure. CVs are NOT in this file and NOT in static/certificates/.
+# Eduardo CONFIRMED 27 Nov 2026 that the two CliftonStrengths reports ARE
+# included (personal assessment reports; privacy check found no phone,
+# email or address in them). Privacy scan 27 Nov 2026: the 12 course
+# certificates contain no contact details or personal identifiers.
 # Dates are the completion/issue dates read from each PDF.
 # Titles: EN is the certificate's own wording; titleEs is a Spanish
 # rendering for the ES page. Issuers are as printed on the certificate.
@@ -106,19 +112,3 @@ certificates:
     date: "2024-01-26"
     file: "virtual-technical-airlift-2023.pdf"
     kind: certificate
-  # CVs — NOT certificates. Kept for reference; excluded from the grid
-  # (kind: cv). RESP-078 asks Eduardo whether to leave them out.
-  - id: cv-2023-eduardo-jaramillo
-    title: "CV 2023 - Eduardo Jaramillo"
-    titleEs: "CV 2023 - Eduardo Jaramillo"
-    issuer: ""
-    date: "2023"
-    file: "cv-2023-eduardo-jaramillo.pdf"
-    kind: cv
-  - id: cv-2024-eduardo-jaramillo
-    title: "CV 2024 - Eduardo Jaramillo"
-    titleEs: "CV 2024 - Eduardo Jaramillo"
-    issuer: ""
-    date: "2024"
-    file: "cv-2024-eduardo-jaramillo.pdf"
-    kind: cv
