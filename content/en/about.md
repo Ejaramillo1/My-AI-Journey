@@ -38,6 +38,10 @@ I'm also an **AI builder** — not by training, but by obsession. I run a self-h
 
 This blog is bilingual. I write in English and Spanish. Some posts are in both languages, some in one — depending on the audience.
 
+### Family
+
+Off the keyboard, I'm a dad. My kids Oli and Lalo ride mountain bikes, and in August 2024 they represented Baja California at the national XCO championship in Guanajuato, alongside ten other young riders from the state. El Imparcial covered the team before the trip: [“Pequeños ciclistas buscan poner en alto el nombre BC en torneo nacional”](https://www.elimparcial.com/tij/tijuana/2024/07/16/pequenos-ciclistas-buscan-poner-en-alto-el-nombre-bc-en-torneo-nacional/) (in Spanish, July 16, 2024).
+
 ---
 
 *This is a personal blog. Opinions are my own, not my employer's.*
