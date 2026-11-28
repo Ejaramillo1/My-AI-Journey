@@ -38,6 +38,10 @@ También soy un **constructor de IA** — no por formación, sino por obsesión.
 
 Este blog es bilingüe. Escribo en inglés y español. Algunos posts están en ambos idiomas, otros en uno solo — depende de la audiencia.
 
+### Familia
+
+Fuera del teclado, soy papá. Mis hijos Oli y Lalo andan en bicicleta de montaña, y en agosto de 2024 representaron a Baja California en el campeonato nacional XCO en Guanajuato, junto con otros diez niños del estado. El Imparcial cubrió al equipo antes del viaje: [“Pequeños ciclistas buscan poner en alto el nombre BC en torneo nacional”](https://www.elimparcial.com/tij/tijuana/2024/07/16/pequenos-ciclistas-buscan-poner-en-alto-el-nombre-bc-en-torneo-nacional/) (16 de julio de 2024).
+
 ---
 
 *Este es un blog personal. Las opiniones son mías, no de mi empleador.*
