@@ -91,6 +91,20 @@ DefaultContentLanguage = "en"
     title = "My AI Journey"
     [languages.en.params]
       description = "Eduardo Jaramillo, Research Engineer (Agentic Platforms) at Teradata — agent memory, evaluation, observability. Building AI agents, learning in public"
+    # Menu labels are per-language (REVIEW-059): the global menu showed
+    # the English "Certificates" label on the Spanish site too.
+    [[languages.en.menu.main]]
+      name = "Blog"
+      pageRef = "/posts"
+      weight = 10
+    [[languages.en.menu.main]]
+      name = "About"
+      pageRef = "/about"
+      weight = 20
+    [[languages.en.menu.main]]
+      name = "Certificates"
+      pageRef = "/certificates"
+      weight = 30
 
   [languages.es]
     languageName = "Español"
@@ -99,21 +113,20 @@ DefaultContentLanguage = "en"
     title = "My AI Journey"
     [languages.es.params]
       description = "Eduardo Jaramillo, Ingeniero de Investigación en Teradata — memoria de agentes, evaluación y observabilidad. Construyendo agentes de IA y aprendiendo en público"
+    [[languages.es.menu.main]]
+      name = "Blog"
+      pageRef = "/posts"
+      weight = 10
+    [[languages.es.menu.main]]
+      name = "About"
+      pageRef = "/about"
+      weight = 20
+    [[languages.es.menu.main]]
+      name = "Certificados"
+      pageRef = "/certificates"
+      weight = 30
 
 [markup]
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
-
-[[menu.main]]
-  name = "Blog"
-  pageRef = "/posts"
-  weight = 10
-[[menu.main]]
-  name = "About"
-  pageRef = "/about"
-  weight = 20
-[[menu.main]]
-  name = "Certificates"
-  pageRef = "/certificates"
-  weight = 30

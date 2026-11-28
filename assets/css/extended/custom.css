@@ -1230,15 +1230,25 @@ body.list.home {
    Grid of tiles; each tile opens its PDF in a new tab. Uses the site
    accent + panel variables so it works in both themes. The page uses
    the 1120px list shell (baseof.html adds class="list" for layout
-   "certificates"), so the grid gets 2-3 columns on desktop. */
+   "certificates"), so the grid gets 2-3 columns on desktop.
+   The min track is bounded by min(240px, 100%) (REVIEW-059): a plain
+   240px minimum overflows when the available content width drops
+   below 240px. The grid is a <ul>; the <li> is a flex wrapper so the
+   tile anchor fills its cell and keeps its native link role. */
 .cert-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
     gap: 16px;
     margin: 24px 0 8px;
+    padding: 0;
+    list-style: none;
+}
+.cert-tile-item {
+    display: flex;
 }
 .cert-tile {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 6px;
     padding: 16px 18px;
